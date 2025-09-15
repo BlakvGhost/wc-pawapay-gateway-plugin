@@ -2,7 +2,7 @@
 /*
 Plugin Name: WooCommerce PawaPay Gateway
 Description: Paiement mobile via PawaPay pour WooCommerce (avec conversion automatique vers XOF/XAF).
-Version: 1.2.1
+Version: 1.2.2
 Author: Ferray Digital Solutions
 Requires at least: 5.6
 WC requires at least: 5.5
@@ -12,6 +12,14 @@ WC tested up to: 7.0
 if (! defined('ABSPATH')) {
     exit;
 }
+
+// Déclarer la compatibilité avec WooCommerce
+add_action('before_woocommerce_init', function () {
+    if (class_exists('\Automattic\WooCommerce\Utilities\FeaturesUtil')) {
+        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('custom_order_tables', __FILE__, true);
+        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('cart_checkout_blocks', __FILE__, true);
+    }
+});
 
 add_action('plugins_loaded', 'wc_pawapay_init_gateway', 11);
 
@@ -84,7 +92,13 @@ add_action('wp_enqueue_scripts', 'pawapay_localize_scripts');
 
 function pawapay_localize_scripts()
 {
-    if (is_checkout()) {
+    if (is_checkout() || is_wc_endpoint_url('order-pay')) {
+        wp_register_script('pawapay-checkout', plugin_dir_url(__FILE__) . 'assets/js/pawapay-checkout.js', ['jquery'], '1.0.0', true);
+        wp_register_style('pawapay-checkout', plugin_dir_url(__FILE__) . 'assets/css/pawapay-checkout.css', [], '1.0.0');
+
+        wp_enqueue_script('pawapay-checkout');
+        wp_enqueue_style('pawapay-checkout');
+
         wp_localize_script('pawapay-checkout', 'pawapay_vars', [
             'ajax_url' => admin_url('admin-ajax.php'),
             'ajax_nonce' => wp_create_nonce('pawapay_nonce'),
@@ -94,5 +108,19 @@ function pawapay_localize_scripts()
             'no_providers' => __('Aucun opérateur disponible', 'woocommerce'),
             'error_loading' => __('Erreur lors du chargement', 'woocommerce'),
         ]);
+    }
+}
+
+add_action('woocommerce_rest_checkout_process_payment_with_context', 'pawapay_save_custom_fields', 10, 2);
+function pawapay_save_custom_fields($context, $payment_result)
+{
+    if (isset($_POST['pawapay_country'])) {
+        $context->payment_data['pawapay_country'] = sanitize_text_field($_POST['pawapay_country']);
+    }
+    if (isset($_POST['pawapay_provider'])) {
+        $context->payment_data['pawapay_provider'] = sanitize_text_field($_POST['pawapay_provider']);
+    }
+    if (isset($_POST['pawapay_phone'])) {
+        $context->payment_data['pawapay_phone'] = sanitize_text_field($_POST['pawapay_phone']);
     }
 }
