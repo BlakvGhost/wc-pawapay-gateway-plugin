@@ -2,8 +2,9 @@
 /*
 Plugin Name: WooCommerce PawaPay Gateway
 Description: Paiement mobile via la page de paiement PawaPay pour WooCommerce.
-Version: 2.1.0
-Author: Ferray Digital Solutions
+Version: 1.0.0
+Author: Kabirou ALASSANE
+Author URI: https://kabiroualassane.link
 Requires at least: 5.6
 WC requires at least: 5.5
 WC tested up to: 8.0
@@ -13,7 +14,6 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-// Définir une constante pour le chemin du plugin, très utile pour la robustesse
 define('WC_PAWAPAY_PLUGIN_FILE', __FILE__);
 
 /**
@@ -25,40 +25,15 @@ function wc_pawapay_init_gateway()
         return;
     }
 
-    // Charger les classes principales
     require_once __DIR__ . '/includes/class-pawapay-api.php';
     require_once __DIR__ . '/includes/class-wc-gateway-pawapay.php';
 
-    // Ajouter la passerelle à la liste de WooCommerce
     add_filter('woocommerce_payment_gateways', function ($gateways) {
         $gateways[] = 'WC_Gateway_PawaPay';
         return $gateways;
     });
 }
 add_action('plugins_loaded', 'wc_pawapay_init_gateway');
-
-/**
- * Enregistrement de l'intégration avec les Blocs WooCommerce.
- * C'est la section cruciale qui résout le problème.
- */
-function wc_pawapay_blocks_support()
-{
-    if (!class_exists('Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType')) {
-        return;
-    }
-
-    require_once __DIR__ . '/includes/class-wc-pawapay-blocks-support.php';
-
-    // Le hook que vous suspectiez ! Celui-ci est le bon pour enregistrer notre classe de support.
-    add_action(
-        'woocommerce_blocks_payment_method_type_registration',
-        function (Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry) {
-            $payment_method_registry->register(new WC_PawaPay_Blocks_Support());
-        }
-    );
-}
-// Nous utilisons 'woocommerce_blocks_loaded' pour nous assurer que tout est prêt avant d'essayer d'enregistrer notre méthode.
-add_action('woocommerce_blocks_loaded', 'wc_pawapay_blocks_support');
 
 /**
  * Enregistrement de l'endpoint pour la conversion de devise.
@@ -69,7 +44,7 @@ function pawapay_register_currency_conversion_route()
         'methods'             => WP_REST_Server::CREATABLE,
         'callback'            => 'pawapay_handle_currency_conversion',
         'permission_callback' => function () {
-            return true; // Permettre à tout le monde d'accéder à cet endpoint
+            return true;
         },
     ]);
 }
@@ -82,7 +57,6 @@ function pawapay_handle_currency_conversion(WP_REST_Request $request)
 {
     $params = $request->get_json_params();
 
-    // Si les données sont envoyées en form-data plutôt qu'en JSON
     if (empty($params)) {
         $params = $request->get_params();
     }
@@ -91,7 +65,6 @@ function pawapay_handle_currency_conversion(WP_REST_Request $request)
     $to = sanitize_text_field($params['to']);
     $amount = floatval($params['amount']);
 
-    // Initialiser WooCommerce si nécessaire
     if (!function_exists('WC')) {
         return new WP_REST_Response([
             'success' => false,
@@ -110,7 +83,6 @@ function pawapay_handle_currency_conversion(WP_REST_Request $request)
 
     $pawapay_gateway = $gateways['pawapay'];
 
-    // Vérifier que la méthode convert_currency existe
     if (!method_exists($pawapay_gateway, 'convert_currency')) {
         return new WP_REST_Response([
             'success' => false,
