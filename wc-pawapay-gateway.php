@@ -1,14 +1,17 @@
 <?php
 /*
 Plugin Name: WooCommerce PawaPay Gateway
-Description: Paiement mobile via la page de paiement PawaPay pour WooCommerce.
+Description: Integrates Mobile Money payments via the PawaPay Payment Page into WooCommerce. Supports multi-country, multi-operator payments with automatic currency conversion (XOF/XAF/EUR/USD) and optional ExchangeRate API integration.
 Version: 1.0.0
 Author: Kabirou ALASSANE
 Author URI: https://kabiroualassane.link
 Requires at least: 5.6
 WC requires at least: 5.5
 WC tested up to: 8.0
+Text Domain: wc-pawapay-gateway
+Domain Path: /languages
 */
+
 
 if (!defined('ABSPATH')) {
     exit;
