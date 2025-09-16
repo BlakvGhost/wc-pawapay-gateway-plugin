@@ -49,9 +49,6 @@ class PawaPay_Api
         $logger = wc_get_logger();
         if (is_wp_error($response)) {
             $logger->error('PawaPay API Error (Payment Page): ' . $response->get_error_message(), ['source' => 'pawapay']);
-        } else {
-            $logger->info('PawaPay Payment Page Request: ' . wp_json_encode($payload), ['source' => 'pawapay']);
-            $logger->info('PawaPay Payment Page Response: ' . wp_remote_retrieve_body($response), ['source' => 'pawapay']);
         }
 
         return $response;

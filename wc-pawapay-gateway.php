@@ -16,9 +16,6 @@ if (!defined('ABSPATH')) {
 
 define('WC_PAWAPAY_PLUGIN_FILE', __FILE__);
 
-/**
- * Fonction principale d'initialisation du plugin.
- */
 function wc_pawapay_init_gateway()
 {
     if (!class_exists('WC_Payment_Gateway')) {
@@ -35,9 +32,6 @@ function wc_pawapay_init_gateway()
 }
 add_action('plugins_loaded', 'wc_pawapay_init_gateway');
 
-/**
- * Enregistrement de l'endpoint pour la conversion de devise.
- */
 function pawapay_register_currency_conversion_route()
 {
     register_rest_route('pawapay/v1', '/convert-currency', [
@@ -50,9 +44,6 @@ function pawapay_register_currency_conversion_route()
 }
 add_action('rest_api_init', 'pawapay_register_currency_conversion_route');
 
-/**
- * Gère la conversion de devise via REST API.
- */
 function pawapay_handle_currency_conversion(WP_REST_Request $request)
 {
     $params = $request->get_json_params();
@@ -105,9 +96,6 @@ function pawapay_handle_currency_conversion(WP_REST_Request $request)
     ], 200);
 }
 
-/**
- * Gère les notifications de webhook de PawaPay.
- */
 function pawapay_handle_webhook(WP_REST_Request $request)
 {
     $body = $request->get_json_params();
@@ -119,7 +107,7 @@ function pawapay_handle_webhook(WP_REST_Request $request)
     }
 
     $payment_page_id = sanitize_text_field($body['paymentPageId']);
-    list($order_id) = explode('_', $payment_page_id);
+    $order_id = $body['merchantReference'] ?? 0;
 
     $order = wc_get_order($order_id);
 
@@ -138,6 +126,7 @@ function pawapay_handle_webhook(WP_REST_Request $request)
         case 'COMPLETED':
             $order->add_order_note(__('Paiement PawaPay réussi. ID de transaction: ', 'woocommerce') . $transaction_id);
             $order->payment_complete($transaction_id);
+            $order->update_status('processing', __('Paiement confirmé par PawaPay.', 'woocommerce'));
             break;
         case 'FAILED':
             $reason = isset($body['failureReason']) ? sanitize_text_field($body['failureReason']) : 'Inconnue';
@@ -158,3 +147,82 @@ function pawapay_add_styles()
         wp_enqueue_style('pawapay-checkout-style', plugin_dir_url(__FILE__) . 'assets/css/style.css', [], '1.0.0');
     }
 }
+
+function pawapay_register_webhook_route()
+{
+    register_rest_route('pawapay/v1', '/webhook', [
+        'methods'             => WP_REST_Server::CREATABLE,
+        'callback'            => 'pawapay_handle_webhook',
+        'permission_callback' => '__return_true',
+    ]);
+}
+add_action('rest_api_init', 'pawapay_register_webhook_route');
+
+function pawapay_register_return_route()
+{
+    register_rest_route('pawapay/v1', '/return', [
+        'methods'             => WP_REST_Server::READABLE,
+        'callback'            => 'pawapay_handle_return',
+        'permission_callback' => '__return_true',
+    ]);
+}
+add_action('rest_api_init', 'pawapay_register_return_route');
+
+function pawapay_handle_return(WP_REST_Request $request)
+{
+    $order_id    = absint($request->get_param('order_id'));
+    $deposit_id  = sanitize_text_field($request->get_param('deposit_id'));
+
+    $order = wc_get_order($order_id);
+    if (!$order) {
+        wp_redirect(wc_get_checkout_url());
+        exit;
+    }
+
+    // Vérifier l'état auprès de l'API PawaPay
+    $gateway = WC()->payment_gateways->payment_gateways()['pawapay'] ?? null;
+    if (!$gateway) {
+        wc_add_notice(__('Erreur: Gateway PawaPay introuvable.', 'woocommerce'), 'error');
+        wp_redirect(wc_get_checkout_url());
+        exit;
+    }
+
+    $client = $gateway->client;
+    $url    = $client->get_base_url() . '/deposits/' . $deposit_id;
+    $resp   = wp_remote_get($url, ['headers' => $client->get_headers(), 'timeout' => 30]);
+
+    if (is_wp_error($resp) || wp_remote_retrieve_response_code($resp) !== 200) {
+        wc_add_notice(__('Impossible de vérifier le statut du paiement.', 'woocommerce'), 'error');
+        wp_redirect($order->get_cancel_order_url_raw());
+        exit;
+    }
+
+    $data   = json_decode(wp_remote_retrieve_body($resp), true);
+    $status = $data['status'] ? $data['data']['status'] : null;
+    $logger = wc_get_logger();
+    $logger->info('Retour PawaPay pour la commande ' . $order_id . 'status : ' . $status . ' data: ' . wp_json_encode($data), ['source' => 'pawapay']);
+    switch ($status) {
+        case 'COMPLETED':
+            if (!$order->is_paid()) {
+                $order->payment_complete($deposit_id);
+                $order->update_status('processing', __('Paiement confirmé par PawaPay (return).', 'woocommerce'));
+            }
+            wp_safe_redirect($order->get_checkout_order_received_url());
+            exit;
+
+        case 'FAILED':
+        case 'CANCELLED':
+        default:
+            $order->update_status('failed', __('Paiement échoué ou annulé via PawaPay (return).', 'woocommerce'));
+            wp_safe_redirect(add_query_arg('pawapay_error', '1', wc_get_checkout_url()));
+            exit;
+    }
+
+    exit;
+}
+
+add_action('woocommerce_before_checkout_form', function () {
+    if (!empty($_GET['pawapay_error'])) {
+        wc_print_notice(__('Votre paiement n’a pas pu être traité, merci de réessayer.', 'woocommerce'), 'error');
+    }
+});

@@ -75,10 +75,10 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
                 'title'       => 'Langue de la page de paiement',
                 'type'        => 'select',
                 'options'     => [
-                    'sandbox'    => 'Français',
-                    'production' => 'Anglais'
+                    'fr'    => 'Français',
+                    'en' => 'Anglais'
                 ],
-                'default' => 'Français',
+                'default' => 'fr',
             ]
         ];
     }
@@ -203,7 +203,6 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
         $country_code = isset($_POST['wc-pawapay-new-payment-method']['pawapay_country']) ? sanitize_text_field($_POST['wc-pawapay-new-payment-method']['pawapay_country']) : null;
         $currency_code = isset($_POST['wc-pawapay-new-payment-method']['pawapay_currency']) ? sanitize_text_field($_POST['wc-pawapay-new-payment-method']['pawapay_currency']) : null;
 
-
         if (empty($country_code) || empty($currency_code)) {
             $country_code = $order->get_meta('pawapay_country');
             $currency_code = $order->get_meta('pawapay_currency');
@@ -221,6 +220,19 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
             return ['result' => 'failure'];
         }
 
+        $items = $order->get_items();
+        $product_names = [];
+
+        foreach ($items as $item) {
+            $product_names[] = $item->get_name();
+        }
+
+        if (count($product_names) === 1) {
+            $reason = 'Paiement pour ' . $product_names[0];
+        } else {
+            $reason = 'Paiement pour ' . $product_names[0] . ' et ' . (count($product_names) - 1) . ' autres articles';
+        }
+
         $payment_page_id = $this->generateUuidV4();
         $payload = [
             'depositId' => $payment_page_id,
@@ -229,8 +241,11 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
                 'currency' => $currency_code,
             ],
             'country' => $country_code,
-            'reason' => 'Paiement pour la commande #' . $order->get_id(),
-            'returnUrl' => $this->get_return_url($order),
+            'reason' => $reason,
+            'returnUrl' => add_query_arg([
+                'order_id'   => $order->get_id(),
+                'deposit_id' => $payment_page_id,
+            ], rest_url('pawapay/v1/return')),
         ];
 
         $order->update_meta_data('pawapay_country', $country_code);
@@ -248,7 +263,6 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
         $code = wp_remote_retrieve_response_code($resp);
         $body = wp_remote_retrieve_body($resp);
         $data = json_decode($body, true);
-
 
         if ($code !== 201 || empty($data['redirectUrl'])) {
             $error_message = __('Le paiement a été rejeté par PawaPay.', 'woocommerce');
@@ -271,20 +285,28 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
 
     public function convert_currency($from, $to, $amount)
     {
-        $api_key = '9fdc3cd76b46c0adc2c34523';
-        $url = "https://api.exchangerate-api.com/v4/latest/{$from}";
-        $response = wp_remote_get($url);
+        $cache_key = 'pawapay_exchange_rate_' . $from . '_' . $to;
+        $cached_rate = get_transient($cache_key);
 
-        if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
-            return new WP_Error('conversion_error', 'Erreur de conversion de devise.');
+        if ($cached_rate !== false) {
+            $rate = $cached_rate;
+        } else {
+            $url = "https://api.exchangerate-api.com/v4/latest/{$from}";
+            $response = wp_remote_get($url);
+
+            if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
+                return new WP_Error('conversion_error', 'Erreur de conversion de devise.');
+            }
+
+            $data = json_decode(wp_remote_retrieve_body($response), true);
+            if (!isset($data['rates'][$to])) {
+                return new WP_Error('conversion_error', 'Devise cible non disponible.');
+            }
+
+            $rate = $data['rates'][$to];
+            set_transient($cache_key, $rate, 6 * HOUR_IN_SECONDS);
         }
 
-        $data = json_decode(wp_remote_retrieve_body($response), true);
-        if (!isset($data['rates'][$to])) {
-            return new WP_Error('conversion_error', 'Devise cible non disponible.');
-        }
-
-        $rate = $data['rates'][$to];
         $converted_amount = $amount * $rate;
         return ceil($converted_amount);
     }

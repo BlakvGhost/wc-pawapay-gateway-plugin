@@ -7,7 +7,6 @@ jQuery(document).ready(function ($) {
     var $currencySelect = $('#pawapay_currency');
     var $convertedAmountDiv = $('.pawapay-converted-amount');
 
-    // Format amount for display
     function formatAmount(amount, currency) {
         if (!amount) return amount;
         if (amount > 1000 && amount % 100 === 0) {
@@ -19,7 +18,6 @@ jQuery(document).ready(function ($) {
         }).format(amount) + ' ' + currency;
     }
 
-    // Function to update currency dropdown
     function updateCurrencyDropdown(countryCode) {
         $currencySelect = $('#pawapay_currency');
         $currencySelect.empty().append('<option value="">Sélectionnez une devise</option>');
@@ -64,13 +62,11 @@ jQuery(document).ready(function ($) {
         }
     }
 
-    // Handle country change
     $(document).on('change', '#pawapay_country', function () {
         var countryCode = $(this).val();
         updateCurrencyDropdown(countryCode);
     });
 
-    // Handle WooCommerce checkout updates
     $(document).on('updated_checkout', function () {
         $countrySelect = $('#pawapay_country');
         if ($countrySelect.length && $countrySelect.val()) {
@@ -78,7 +74,6 @@ jQuery(document).ready(function ($) {
         }
     });
 
-    // Handle currency change and fetch converted amount
     $(document).on('change', '#pawapay_currency', function () {
         var currencyCode = $(this).val();
         var countryCode = $countrySelect.val();

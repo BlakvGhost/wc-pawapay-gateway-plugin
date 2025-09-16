@@ -1,17 +1,29 @@
 .woocommerce-pawapay-fields p.form-row {
-    margin-bottom: 1em;
+  margin-bottom: 1em;
 }
 .wc-pawapay-country-select,
 .wc-pawapay-currency-select {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 .pawapay-converted-amount {
-    margin-top: 1em;
-    font-size: 0.9em;
+  margin-top: 1em;
+  font-size: 0.9em;
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 5px;
+  border-left: 4px solid #007cba;
 }
 .required {
-    color: red;
+  color: red;
+}
+.pawapay-redirect-notice {
+  background-color: #fff8e1;
+  border-left: 4px solid #ffb900;
+  padding: 15px;
+  margin: 15px 0;
+  border-radius: 5px;
+  font-size: 0.9em;
 }
