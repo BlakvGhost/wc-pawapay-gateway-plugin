@@ -101,35 +101,52 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
     {
         $order = wc_get_order($order_id);
 
-        $country_code = isset($_POST['pawapay_country']) ? sanitize_text_field($_POST['pawapay_country']) : null;
-        $currency_code = isset($_POST['pawapay_currency']) ? sanitize_text_field($_POST['pawapay_currency']) : null;
-        var_dump($country_code, $currency_code);
-        exit();
-        error_log('PawaPay - Pays reçu: ' . $country_code);
-        error_log('PawaPay - Devise reçue: ' . $currency_code);
+        $logger = wc_get_logger();
+        $logger->info('PawaPay - Données POST reçues: ' . print_r($_POST, true));
+
+        // 🔹 Cas checkout classique : données envoyées via $_POST
+        $country_code = isset($_POST['pawapay_country']) ? sanitize_text_field($_POST['pawapay_country']) : '';
+        $currency_code = isset($_POST['pawapay_currency']) ? sanitize_text_field($_POST['pawapay_currency']) : '';
+
+        // 🔹 Cas checkout blocs (Store API) : valeurs récupérées depuis les métadonnées
+        if (empty($country_code) || empty($currency_code)) {
+            $country_code = $order->get_meta('pawapay_country');
+            $currency_code = $order->get_meta('pawapay_currency');
+        }
+
+        $logger->info('PawaPay - Pays utilisé: ' . $country_code);
+        $logger->info('PawaPay - Devise utilisée: ' . $currency_code);
 
         if (empty($country_code) || empty($currency_code)) {
             wc_add_notice(__('Veuillez sélectionner un pays et une devise.', 'woocommerce'), 'error');
             return ['result' => 'failure'];
         }
 
+        // Sauvegarde dans les métadonnées de la commande
+        $order->update_meta_data('pawapay_country', $country_code);
+        $order->update_meta_data('pawapay_currency', $currency_code);
+        $order->save();
+
+        // Montant et conversion
         $order_total = $order->get_total();
         $converted_amount = $this->convert_currency(get_woocommerce_currency(), $currency_code, $order_total);
+
         if (is_wp_error($converted_amount)) {
             wc_add_notice(__('Erreur de conversion de devise.', 'woocommerce'), 'error');
             return ['result' => 'failure'];
         }
 
+        // Identifiant unique de la page de paiement
         $payment_page_id = (string) $order->get_id() . '_' . time();
 
         $payload = [
-            "paymentPageId" => $payment_page_id,
+            "depositId"     => $payment_page_id,
             "amountDetails" => [
-                "amount" => (float) $converted_amount,
-                "currency" => $currency_code
+                "amount"   => (float) $converted_amount,
+                "currency" => $currency_code,
             ],
-            "country" => $country_code,
-            "reason" => "Paiement pour la commande #" . $order->get_id(),
+            "country"   => $country_code,
+            "reason"    => "Paiement pour la commande #" . $order->get_id(),
             "returnUrl" => $this->get_return_url($order),
         ];
 
@@ -159,9 +176,10 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
 
         return [
             'result'   => 'success',
-            'redirect' => $data['redirectUrl']
+            'redirect' => $data['redirectUrl'],
         ];
     }
+
 
     public function convert_currency($from, $to, $amount)
     {

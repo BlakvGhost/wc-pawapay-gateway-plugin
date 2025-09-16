@@ -32,6 +32,7 @@ const PawaPayComponent = () => {
     const [currencies, setCurrencies] = useState([]);
     const [convertedAmount, setConvertedAmount] = useState(null);
 
+    // ** CORRECTION : Retour à votre implémentation originale, plus sûre **
     const paymentMethodData = usePaymentMethodData ? usePaymentMethodData() : {
         emitResponse: {
             notice: () => { },
@@ -40,20 +41,12 @@ const PawaPayComponent = () => {
         getData: () => ({}),
         setData: () => { }
     };
+    const { setData } = paymentMethodData;
 
-    const { emitResponse, getData, setData } = paymentMethodData;
     const orderTotal = settings.total_price;
     const currentCurrency = settings.current_currency;
 
-    // Debug des changements d'état
-    useEffect(() => {
-        console.log('convertedAmount changé:', convertedAmount);
-    }, [convertedAmount]);
-
-    useEffect(() => {
-        console.log('selectedCurrency changé:', selectedCurrency);
-    }, [selectedCurrency]);
-
+    // Effet déclenché lors du changement de pays
     useEffect(() => {
         if (selectedCountry && countries[selectedCountry]) {
             const extractedCurrencies = [];
@@ -68,78 +61,57 @@ const PawaPayComponent = () => {
                 });
             });
 
+            const initialCurrency = extractedCurrencies[0]?.currency || '';
             setCurrencies(extractedCurrencies);
+            setSelectedCurrency(initialCurrency);
             setConvertedAmount(null);
-            setSelectedCurrency('');
+
+            // Met à jour les données envoyées au backend
             setData({
                 pawapay_country: selectedCountry,
-                pawapay_currency: ''
+                pawapay_currency: initialCurrency,
             });
+
         } else {
             setCurrencies([]);
-            setConvertedAmount(null);
             setSelectedCurrency('');
+            setConvertedAmount(null);
+            // Vide les données envoyées au backend
             setData({
                 pawapay_country: '',
-                pawapay_currency: ''
+                pawapay_currency: '',
             });
         }
     }, [selectedCountry, countries, setData]);
 
+    // Gère le changement de pays
     const handleCountryChange = (event) => {
         const country = event.target.value;
         setSelectedCountry(country);
+    };
+
+    // Gère le changement de devise
+    const handleCurrencyChange = (event) => {
+        const currencyCode = event.target.value;
+        setSelectedCurrency(currencyCode);
+
+        // Met à jour les données envoyées au backend
         setData({
-            pawapay_country: country,
-            pawapay_currency: selectedCurrency
+            pawapay_country: selectedCountry,
+            pawapay_currency: currencyCode,
         });
     };
 
-    const handleCurrencyChange = async (event) => {
-        const currencyCode = event.target.value;
-        setSelectedCurrency(currencyCode);
-        setData({
-            pawapay_country: selectedCountry,
-            pawapay_currency: currencyCode
-        });
-
-        if (currencyCode && currencyCode !== currentCurrency) {
-            try {
-                console.log('Début conversion:', { from: currentCurrency, to: currencyCode, amount: orderTotal });
-
-                const response = await fetch('/wp-json/pawapay/v1/convert-currency', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        from: currentCurrency,
-                        to: currencyCode,
-                        amount: orderTotal
-                    }),
-                });
-
-                const data = await response.json();
-                console.log('Réponse API conversion:', data);
-
-                if (data.success) {
-                    console.log('Conversion réussie:', data.data);
-                    setConvertedAmount(data.data);
-                } else {
-                    console.log('Conversion échouée:', data.message);
-                    setConvertedAmount(null);
-                    if (emitResponse.notice) {
-                        emitResponse.notice(emitResponse.noticeTypes.ERROR, data.message || 'Erreur de conversion de devise.');
-                    }
-                }
-            } catch (error) {
-                console.error('Erreur de conversion:', error);
-                setConvertedAmount(null);
-            }
-        } else {
-            console.log('Aucune conversion nécessaire');
-            setConvertedAmount(null);
+    // Fonction pour formater le montant
+    const formatAmount = (amount, currencyCode) => {
+        if (!amount) return amount;
+        if (amount > 1000 && amount % 100 === 0) {
+            amount = amount / 100;
         }
+        return new Intl.NumberFormat('fr-FR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(amount);
     };
 
     return createElement('div', null,
@@ -149,7 +121,7 @@ const PawaPayComponent = () => {
                 createElement('label', { htmlFor: 'pawapay_country' }, 'Pays', createElement('span', { className: 'required' }, '*')),
                 createElement('select', {
                     id: 'pawapay_country',
-                    name: 'pawapay_country',
+                    name: 'pawapay_country', // Retour au nom original
                     className: 'wc-pawapay-country-select',
                     onChange: handleCountryChange,
                     value: selectedCountry,
@@ -165,7 +137,7 @@ const PawaPayComponent = () => {
                 createElement('label', { htmlFor: 'pawapay_currency' }, 'Devise', createElement('span', { className: 'required' }, '*')),
                 createElement('select', {
                     id: 'pawapay_currency',
-                    name: 'pawapay_currency',
+                    name: 'pawapay_currency', // Retour au nom original
                     className: 'wc-pawapay-currency-select',
                     onChange: handleCurrencyChange,
                     value: selectedCurrency,
