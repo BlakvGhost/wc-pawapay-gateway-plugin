@@ -9,6 +9,7 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
     public $environment;
     public $client;
     public $merchant_name;
+    public $exchange_api_key;
     public $supported_countries = ['BJ', 'BF', 'CI', 'CM', 'ML', 'NE', 'SN', 'TG', 'GH', 'NG', 'ZM', 'EU', 'US', 'FR'];
 
     public function __construct()
@@ -29,6 +30,7 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
         $this->api_token = $this->get_option('api_token');
         $this->environment = $this->get_option('environment', 'sandbox');
         $this->merchant_name = $this->get_option('name', 'Votre Entreprise');
+        $this->exchange_api_key = $this->get_option('exchange_api_key');
 
         require_once __DIR__ . '/class-pawapay-api.php';
         $this->client = new PawaPay_Api($this->environment, $this->api_token);
@@ -79,7 +81,15 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
                     'en' => 'Anglais'
                 ],
                 'default' => 'fr',
-            ]
+            ],
+            'exchange_api_key' => [
+                'title'       => 'Clé API ExchangeRate',
+                'type'        => 'text',
+                'description' => 'Entrez votre clé API ExchangeRate. Laissez vide pour utiliser la version gratuite (non garantie en production).',
+                'default'     => '',
+                'desc_tip'    => true,
+            ],
+
         ];
     }
 
@@ -285,13 +295,22 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
 
     public function convert_currency($from, $to, $amount)
     {
-        $cache_key = 'pawapay_exchange_rate_' . $from . '_' . $to;
+        $cache_key   = '_fdpawapay_exchange_rate_' . $from . '_' . $to;
         $cached_rate = get_transient($cache_key);
 
         if ($cached_rate !== false) {
             $rate = $cached_rate;
         } else {
-            $url = "https://api.exchangerate-api.com/v4/latest/{$from}";
+            $api_key  = isset($this->exchange_api_key) ? trim($this->exchange_api_key) : '';
+
+            if (!empty($api_key)) {
+                // Endpoint payant (clé API définie)
+                $url = "https://v6.exchangerate-api.com/v6/{$api_key}/latest/{$from}";
+            } else {
+                // Endpoint gratuit (fallback)
+                $url = "https://api.exchangerate-api.com/v4/latest/{$from}";
+            }
+
             $response = wp_remote_get($url);
 
             if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
@@ -299,17 +318,19 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
             }
 
             $data = json_decode(wp_remote_retrieve_body($response), true);
-            if (!isset($data['rates'][$to])) {
+
+            if (!isset($data['rates'][$to]) && !isset($data['conversion_rates'][$to])) {
                 return new WP_Error('conversion_error', 'Devise cible non disponible.');
             }
 
-            $rate = $data['rates'][$to];
+            $rate = $data['rates'][$to] ?? $data['conversion_rates'][$to];
             set_transient($cache_key, $rate, 6 * HOUR_IN_SECONDS);
         }
 
         $converted_amount = $amount * $rate;
         return ceil($converted_amount);
     }
+
 
     public function ajax_convert_currency()
     {
