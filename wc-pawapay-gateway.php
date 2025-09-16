@@ -61,17 +61,77 @@ function wc_pawapay_blocks_support()
 add_action('woocommerce_blocks_loaded', 'wc_pawapay_blocks_support');
 
 /**
- * Enregistrement de l'endpoint pour le webhook.
+ * Enregistrement de l'endpoint pour la conversion de devise.
  */
-function pawapay_register_webhook_route()
+function pawapay_register_currency_conversion_route()
 {
-    register_rest_route('pawapay/v1', '/webhook', [
-        'methods'             => 'POST',
-        'callback'            => 'pawapay_handle_webhook',
-        'permission_callback' => '__return_true',
+    register_rest_route('pawapay/v1', '/convert-currency', [
+        'methods'             => WP_REST_Server::CREATABLE,
+        'callback'            => 'pawapay_handle_currency_conversion',
+        'permission_callback' => function () {
+            return true; // Permettre à tout le monde d'accéder à cet endpoint
+        },
     ]);
 }
-add_action('rest_api_init', 'pawapay_register_webhook_route');
+add_action('rest_api_init', 'pawapay_register_currency_conversion_route');
+
+/**
+ * Gère la conversion de devise via REST API.
+ */
+function pawapay_handle_currency_conversion(WP_REST_Request $request)
+{
+    $params = $request->get_json_params();
+
+    // Si les données sont envoyées en form-data plutôt qu'en JSON
+    if (empty($params)) {
+        $params = $request->get_params();
+    }
+
+    $from = sanitize_text_field($params['from']);
+    $to = sanitize_text_field($params['to']);
+    $amount = floatval($params['amount']);
+
+    // Initialiser WooCommerce si nécessaire
+    if (!function_exists('WC')) {
+        return new WP_REST_Response([
+            'success' => false,
+            'message' => 'WooCommerce non initialisé'
+        ], 500);
+    }
+
+    $gateways = WC()->payment_gateways->payment_gateways();
+
+    if (!isset($gateways['pawapay'])) {
+        return new WP_REST_Response([
+            'success' => false,
+            'message' => 'Gateway PawaPay non trouvé'
+        ], 500);
+    }
+
+    $pawapay_gateway = $gateways['pawapay'];
+
+    // Vérifier que la méthode convert_currency existe
+    if (!method_exists($pawapay_gateway, 'convert_currency')) {
+        return new WP_REST_Response([
+            'success' => false,
+            'message' => 'Méthode de conversion non disponible'
+        ], 500);
+    }
+
+    $converted = $pawapay_gateway->convert_currency($from, $to, $amount);
+
+    if (is_wp_error($converted)) {
+        return new WP_REST_Response([
+            'success' => false,
+            'message' => $converted->get_error_message()
+        ], 400);
+    }
+
+    return new WP_REST_Response([
+        'success' => true,
+        'data' => $converted
+    ], 200);
+}
 
 /**
  * Gère les notifications de webhook de PawaPay.
@@ -118,7 +178,7 @@ function pawapay_handle_webhook(WP_REST_Request $request)
 
     return new WP_REST_Response(['status' => 'success'], 200);
 }
-// Dans wc-pawapay-gateway.php ou dans une autre classe d'initialisation
+
 add_action('wp_enqueue_scripts', 'pawapay_add_styles');
 function pawapay_add_styles()
 {

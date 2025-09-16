@@ -1,25 +1,58 @@
 const { registerPaymentMethod } = window.wc.wcBlocksRegistry;
-const { getSetting, getSiteSettings } = window.wc.wcSettings;
+const { getSetting } = window.wc.wcSettings;
 const { createElement, useEffect, useState } = window.wp.element;
 const { decodeEntities } = window.wp.htmlEntities;
-const { usePaymentMethodData } = window.wc.wcBlocksCheckout;
+
+const wcBlocksCheckout = window.wc.wcBlocksCheckout || {};
+const { usePaymentMethodData } = wcBlocksCheckout;
 
 const settings = getSetting('pawapay_data', {});
 
+// Fonction pour formater le montant
+const formatAmount = (amount, currencyCode) => {
+    if (!amount) return amount;
+
+    // Si le montant est très grand, c'est probablement en centimes
+    if (amount > 1000 && amount % 100 === 0) {
+        amount = amount / 100;
+    }
+
+    // Formater avec séparateurs de milliers
+    return new Intl.NumberFormat('fr-FR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(amount);
+};
+
 const PawaPayComponent = () => {
-    const siteSettings = getSiteSettings();
     const description = decodeEntities(settings.description || '');
     const countries = settings.countries || {};
     const [selectedCountry, setSelectedCountry] = useState('');
+    const [selectedCurrency, setSelectedCurrency] = useState('');
     const [currencies, setCurrencies] = useState([]);
     const [convertedAmount, setConvertedAmount] = useState(null);
-    const {
-        emitResponse,
-        getData,
-        setData,
-    } = usePaymentMethodData();
+
+    const paymentMethodData = usePaymentMethodData ? usePaymentMethodData() : {
+        emitResponse: {
+            notice: () => { },
+            noticeTypes: { ERROR: 'error' }
+        },
+        getData: () => ({}),
+        setData: () => { }
+    };
+
+    const { emitResponse, getData, setData } = paymentMethodData;
     const orderTotal = settings.total_price;
     const currentCurrency = settings.current_currency;
+
+    // Debug des changements d'état
+    useEffect(() => {
+        console.log('convertedAmount changé:', convertedAmount);
+    }, [convertedAmount]);
+
+    useEffect(() => {
+        console.log('selectedCurrency changé:', selectedCurrency);
+    }, [selectedCurrency]);
 
     useEffect(() => {
         if (selectedCountry && countries[selectedCountry]) {
@@ -36,40 +69,75 @@ const PawaPayComponent = () => {
             });
 
             setCurrencies(extractedCurrencies);
-            // Réinitialiser le montant converti et la devise si le pays change
             setConvertedAmount(null);
-            setData({ pawapay_currency: '' });
+            setSelectedCurrency('');
+            setData({
+                pawapay_country: selectedCountry,
+                pawapay_currency: ''
+            });
         } else {
             setCurrencies([]);
             setConvertedAmount(null);
-            setData({ pawapay_country: '', pawapay_currency: '' });
+            setSelectedCurrency('');
+            setData({
+                pawapay_country: '',
+                pawapay_currency: ''
+            });
         }
     }, [selectedCountry, countries, setData]);
 
     const handleCountryChange = (event) => {
-        setSelectedCountry(event.target.value);
-        setData({ pawapay_country: event.target.value });
+        const country = event.target.value;
+        setSelectedCountry(country);
+        setData({
+            pawapay_country: country,
+            pawapay_currency: selectedCurrency
+        });
     };
 
     const handleCurrencyChange = async (event) => {
         const currencyCode = event.target.value;
-        setData({ pawapay_currency: currencyCode });
+        setSelectedCurrency(currencyCode);
+        setData({
+            pawapay_country: selectedCountry,
+            pawapay_currency: currencyCode
+        });
 
         if (currencyCode && currencyCode !== currentCurrency) {
-            // Appel AJAX pour la conversion de devise
-            const response = await fetch(`${siteSettings.wc_ajax_url}?action=pawapay_convert_currency`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `from=${currentCurrency}&to=${currencyCode}&amount=${orderTotal}`,
-            });
-            const data = await response.json();
-            if (data.success) {
-                setConvertedAmount(data.data);
-            } else {
+            try {
+                console.log('Début conversion:', { from: currentCurrency, to: currencyCode, amount: orderTotal });
+
+                const response = await fetch('/wp-json/pawapay/v1/convert-currency', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        from: currentCurrency,
+                        to: currencyCode,
+                        amount: orderTotal
+                    }),
+                });
+
+                const data = await response.json();
+                console.log('Réponse API conversion:', data);
+
+                if (data.success) {
+                    console.log('Conversion réussie:', data.data);
+                    setConvertedAmount(data.data);
+                } else {
+                    console.log('Conversion échouée:', data.message);
+                    setConvertedAmount(null);
+                    if (emitResponse.notice) {
+                        emitResponse.notice(emitResponse.noticeTypes.ERROR, data.message || 'Erreur de conversion de devise.');
+                    }
+                }
+            } catch (error) {
+                console.error('Erreur de conversion:', error);
                 setConvertedAmount(null);
-                emitResponse.notice(emitResponse.noticeTypes.ERROR, 'Erreur de conversion de devise.');
             }
         } else {
+            console.log('Aucune conversion nécessaire');
             setConvertedAmount(null);
         }
     };
@@ -85,6 +153,7 @@ const PawaPayComponent = () => {
                     className: 'wc-pawapay-country-select',
                     onChange: handleCountryChange,
                     value: selectedCountry,
+                    required: true
                 },
                     createElement('option', { value: '' }, 'Sélectionnez un pays'),
                     Object.keys(countries).map(countryCode =>
@@ -99,7 +168,10 @@ const PawaPayComponent = () => {
                     name: 'pawapay_currency',
                     className: 'wc-pawapay-currency-select',
                     onChange: handleCurrencyChange,
+                    value: selectedCurrency,
+                    required: true
                 },
+                    createElement('option', { value: '' }, 'Sélectionnez une devise'),
                     currencies.length > 0 ?
                         currencies.map(currency =>
                             createElement('option', { value: currency.currency, key: currency.currency }, `${currency.displayName} (${currency.currency})`)
@@ -107,10 +179,10 @@ const PawaPayComponent = () => {
                 )
             )
         ),
-        convertedAmount && createElement('div', { className: 'pawapay-converted-amount' },
+        convertedAmount && selectedCurrency && createElement('div', { className: 'pawapay-converted-amount' },
             createElement('p', null,
-                `Le montant total de votre commande de ${orderTotal} ${currentCurrency} sera converti et payé en `,
-                createElement('strong', null, `${convertedAmount} ${getData('pawapay_currency')}`)
+                `Le montant total de votre commande de ${formatAmount(orderTotal, currentCurrency)} ${currentCurrency} sera converti et payé en `,
+                createElement('strong', null, `${formatAmount(convertedAmount, selectedCurrency)} ${selectedCurrency}`)
             )
         )
     );

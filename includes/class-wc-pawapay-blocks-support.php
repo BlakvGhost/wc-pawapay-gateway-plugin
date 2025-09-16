@@ -27,7 +27,15 @@ final class WC_PawaPay_Blocks_Support extends AbstractPaymentMethodType
         $script_url = plugin_dir_url(WC_PAWAPAY_PLUGIN_FILE) . '/assets/js/blocks-checkout.js';
         $script_asset_path = dirname(WC_PAWAPAY_PLUGIN_FILE) . '/assets/js/blocks-checkout.asset.php';
 
-        $dependencies = ['wc-blocks-registry', 'wc-settings', 'wp-element', 'wp-html-entities'];
+        // Dépendances correctes pour les blocs WooCommerce
+        $dependencies = [
+            'wc-blocks-registry',
+            'wc-settings',
+            'wp-element',
+            'wp-html-entities',
+            'wc-blocks-checkout' // Ajout de cette dépendance cruciale
+        ];
+
         $version = '1.0.0';
         if (file_exists($script_asset_path)) {
             $asset = require($script_asset_path);
@@ -60,9 +68,9 @@ final class WC_PawaPay_Blocks_Support extends AbstractPaymentMethodType
             'title'       => $this->get_setting('title', 'Mobile Money (PawaPay)'),
             'description' => $this->get_setting('description', 'Vous serez redirigé pour payer via PawaPay.'),
             'countries'   => !is_wp_error($active_config) ? $active_config['countries'] : [],
-            // Permet de passer le montant total de la commande au JavaScript
             'total_price' => WC()->cart->get_total('edit'),
             'current_currency' => get_woocommerce_currency(),
+            'nonce'       => wp_create_nonce('pawapay_nonce'),
         ];
     }
 }

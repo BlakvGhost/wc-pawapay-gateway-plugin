@@ -35,6 +35,8 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
         $this->client = new PawaPay_Api($this->environment, $this->api_token);
 
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, [$this, 'process_admin_options']);
+        add_action('wp_ajax_pawapay_convert_currency', array($this, 'ajax_convert_currency'));
+        add_action('wp_ajax_nopriv_pawapay_convert_currency', array($this, 'ajax_convert_currency'));
     }
 
     public function init_form_fields()
@@ -101,10 +103,12 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
 
         $country_code = isset($_POST['pawapay_country']) ? sanitize_text_field($_POST['pawapay_country']) : null;
         $currency_code = isset($_POST['pawapay_currency']) ? sanitize_text_field($_POST['pawapay_currency']) : null;
+        var_dump($country_code, $currency_code);
+        exit();
+        error_log('PawaPay - Pays reçu: ' . $country_code);
+        error_log('PawaPay - Devise reçue: ' . $currency_code);
 
-        // Reste du code pour le traitement du paiement...
         if (empty($country_code) || empty($currency_code)) {
-            // Cette erreur ne devrait plus se produire si le JavaScript envoie les données
             wc_add_notice(__('Veuillez sélectionner un pays et une devise.', 'woocommerce'), 'error');
             return ['result' => 'failure'];
         }
@@ -177,5 +181,29 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
         $rate = $data['rates'][$to];
         $converted_amount = $amount * $rate;
         return ceil($converted_amount);
+    }
+
+    // Ajoutez cette méthode à votre classe WC_Gateway_PawaPay
+    public function ajax_convert_currency()
+    {
+        // Vérifier la nonce de sécurité
+        if (!check_ajax_referer('pawapay_nonce', 'nonce', false)) {
+            wp_send_json_error('Nonce de sécurité invalide.');
+            wp_die();
+        }
+
+        $from = sanitize_text_field($_POST['from']);
+        $to = sanitize_text_field($_POST['to']);
+        $amount = floatval($_POST['amount']);
+
+        $converted = $this->convert_currency($from, $to, $amount);
+
+        if (is_wp_error($converted)) {
+            wp_send_json_error($converted->get_error_message());
+        } else {
+            wp_send_json_success($converted);
+        }
+
+        wp_die(); // Toujours terminer avec wp_die() pour les requêtes AJAX
     }
 }
