@@ -84,7 +84,7 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
             ],
             'exchange_api_key' => [
                 'title'       => 'Clé API ExchangeRate',
-                'type'        => 'text',
+                'type'        => 'password',
                 'description' => 'Entrez votre clé API ExchangeRate. Laissez vide pour utiliser la version gratuite (non garantie en production).',
                 'default'     => '',
                 'desc_tip'    => true,
