@@ -190,13 +190,13 @@ This means your customers **cannot bypass failed transactions**, as the order is
 
 ---
 
-## 📜 License
+## License
 
 This plugin is licensed under **GPL v3.0**. See the `LICENSE` file for details.
 
 ---
 
-## 👨‍💻 Contributors
+## Contributors
 
 - Developed & maintained by [Kabirou ALASSANE](https://kabiroualassane.link)  
 
