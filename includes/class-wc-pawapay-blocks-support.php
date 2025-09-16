@@ -24,7 +24,7 @@ final class WC_PawaPay_Blocks_Support extends AbstractPaymentMethodType
     public function get_payment_method_script_handles()
     {
         $script_path = dirname(WC_PAWAPAY_PLUGIN_FILE) . '/assets/js/blocks-checkout.js';
-        $script_url = plugin_dir_url(WC_PAWAPAY_PLUGIN_FILE) . 'assets/js/blocks-checkout.js';
+        $script_url = plugin_dir_url(WC_PAWAPAY_PLUGIN_FILE) . '/assets/js/blocks-checkout.js';
         $script_asset_path = dirname(WC_PAWAPAY_PLUGIN_FILE) . '/assets/js/blocks-checkout.asset.php';
 
         $dependencies = ['wc-blocks-registry', 'wc-settings', 'wp-element', 'wp-html-entities'];
@@ -46,11 +46,23 @@ final class WC_PawaPay_Blocks_Support extends AbstractPaymentMethodType
         return ['wc-pawapay-blocks'];
     }
 
+    /**
+     * Cette fonction est cruciale, elle passe les données de configuration PawaPay au JavaScript.
+     */
     public function get_payment_method_data()
     {
+        $gateways = WC()->payment_gateways->payment_gateways();
+        $pawapay_gateway = $gateways[$this->name];
+
+        $active_config = $pawapay_gateway->get_active_configuration_countries();
+
         return [
             'title'       => $this->get_setting('title', 'Mobile Money (PawaPay)'),
             'description' => $this->get_setting('description', 'Vous serez redirigé pour payer via PawaPay.'),
+            'countries'   => !is_wp_error($active_config) ? $active_config['countries'] : [],
+            // Permet de passer le montant total de la commande au JavaScript
+            'total_price' => WC()->cart->get_total('edit'),
+            'current_currency' => get_woocommerce_currency(),
         ];
     }
 }

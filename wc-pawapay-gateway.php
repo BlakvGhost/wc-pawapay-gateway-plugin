@@ -118,3 +118,11 @@ function pawapay_handle_webhook(WP_REST_Request $request)
 
     return new WP_REST_Response(['status' => 'success'], 200);
 }
+// Dans wc-pawapay-gateway.php ou dans une autre classe d'initialisation
+add_action('wp_enqueue_scripts', 'pawapay_add_styles');
+function pawapay_add_styles()
+{
+    if (is_checkout()) {
+        wp_enqueue_style('pawapay-checkout-style', plugin_dir_url(__FILE__) . 'assets/css/style.css', [], '1.0.0');
+    }
+}

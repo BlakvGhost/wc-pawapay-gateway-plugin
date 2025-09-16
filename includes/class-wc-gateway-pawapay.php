@@ -9,18 +9,16 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
     public $environment;
     public $client;
     public $merchant_name;
-    // La liste des pays supportés est toujours utile pour la visibilité de la passerelle
     public $supported_countries = ['BJ', 'BF', 'CI', 'CM', 'ML', 'NE', 'SN', 'TG', 'GH', 'NG', 'ZM', 'EU', 'US', 'FR'];
 
     public function __construct()
     {
         $this->id = 'pawapay';
-        $this->icon = ''; // Vous pouvez ajouter une icône ici si vous le souhaitez
+        $this->icon = '';
         $this->method_title = 'PawaPay';
         $this->method_description = 'Paiement mobile via la page de paiement PawaPay.';
 
-        // CHANGED: has_fields passe à false car nous n'affichons plus de champs
-        $this->has_fields = false;
+        $this->has_fields = false; // C'est la ligne importante pour les Blocks
 
         $this->init_form_fields();
         $this->init_settings();
@@ -32,11 +30,11 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
         $this->environment = $this->get_option('environment', 'sandbox');
         $this->merchant_name = $this->get_option('name', 'Votre Entreprise');
 
+        // Charger la classe de l'API ici pour qu'elle soit toujours disponible
+        require_once __DIR__ . '/class-pawapay-api.php';
         $this->client = new PawaPay_Api($this->environment, $this->api_token);
 
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, [$this, 'process_admin_options']);
-
-        // REMOVED: add_action('wp_enqueue_scripts'...) n'est plus nécessaire
     }
 
     public function init_form_fields()
@@ -80,22 +78,56 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
         ];
     }
 
+    public function get_active_configuration_countries()
+    {
+        $url = $this->client->get_base_url() . '/active-conf';
+        $args = [
+            'headers' => $this->client->get_headers(),
+            'timeout' => 30,
+        ];
+        $response = wp_remote_get($url, $args);
+
+        if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
+            return new WP_Error('pawapay_api_error', 'Impossible de récupérer la configuration PawaPay.');
+        }
+
+        $data = json_decode(wp_remote_retrieve_body($response), true);
+        return $data;
+    }
+
     public function process_payment($order_id)
     {
         $order = wc_get_order($order_id);
 
-        // Le paymentPageId doit être unique. L'ID de la commande est parfait pour ça.
+        $country_code = isset($_POST['pawapay_country']) ? sanitize_text_field($_POST['pawapay_country']) : null;
+        $currency_code = isset($_POST['pawapay_currency']) ? sanitize_text_field($_POST['pawapay_currency']) : null;
+
+        // Reste du code pour le traitement du paiement...
+        if (empty($country_code) || empty($currency_code)) {
+            // Cette erreur ne devrait plus se produire si le JavaScript envoie les données
+            wc_add_notice(__('Veuillez sélectionner un pays et une devise.', 'woocommerce'), 'error');
+            return ['result' => 'failure'];
+        }
+
+        $order_total = $order->get_total();
+        $converted_amount = $this->convert_currency(get_woocommerce_currency(), $currency_code, $order_total);
+        if (is_wp_error($converted_amount)) {
+            wc_add_notice(__('Erreur de conversion de devise.', 'woocommerce'), 'error');
+            return ['result' => 'failure'];
+        }
+
         $payment_page_id = (string) $order->get_id() . '_' . time();
 
         $payload = [
-            "depositId" => "695776cf-73ba-42ff-b9cb-2b9acc008e22", // A remplacer par un depositId valide
+            "paymentPageId" => $payment_page_id,
+            "amountDetails" => [
+                "amount" => (float) $converted_amount,
+                "currency" => $currency_code
+            ],
+            "country" => $country_code,
+            "reason" => "Paiement pour la commande #" . $order->get_id(),
             "returnUrl" => $this->get_return_url($order),
-            "amount" => (string) $order->get_total(),
-            "country" => "BJ",
-            "reason" => "Demo payment"
         ];
-        // var_dump($payload);
-        // exit();
 
         $resp = $this->client->create_payment_page($payload);
 
@@ -107,15 +139,13 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
         $code = wp_remote_retrieve_response_code($resp);
         $body = wp_remote_retrieve_body($resp);
         $data = json_decode($body, true);
-        var_dump($data, $code, "Erreur ici");
-        exit();
+
         if ($code !== 201 || empty($data['redirectUrl'])) {
             $error_message = __('Le paiement a été rejeté par PawaPay.', 'woocommerce');
             if (!empty($data['message'])) {
                 $error_message .= ' Raison: ' . esc_html($data['message']);
             }
             wc_add_notice($error_message, 'error');
-            wc_add_notice($data, 'error');
             return ['result' => 'failure'];
         }
 
@@ -129,21 +159,23 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
         ];
     }
 
-    public function is_available()
+    public function convert_currency($from, $to, $amount)
     {
-        if ($this->enabled !== 'yes') {
-            return false;
+        $api_key = '9fdc3cd76b46c0adc2c34523';
+        $url = "https://api.exchangerate-api.com/v4/latest/{$from}";
+        $response = wp_remote_get($url);
+
+        if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
+            return new WP_Error('conversion_error', 'Erreur de conversion de devise.');
         }
 
-        if (empty($this->api_token)) {
-            return false;
+        $data = json_decode(wp_remote_retrieve_body($response), true);
+        if (!isset($data['rates'][$to])) {
+            return new WP_Error('conversion_error', 'Devise cible non disponible.');
         }
 
-        $currency = get_woocommerce_currency();
-        if (!in_array($currency, ['XOF', 'XAF', 'EUR', 'USD', 'GHS', 'NGN', 'ZMW'])) { // Liste indicative à vérifier
-            return false;
-        }
-
-        return true;
+        $rate = $data['rates'][$to];
+        $converted_amount = $amount * $rate;
+        return ceil($converted_amount);
     }
 }

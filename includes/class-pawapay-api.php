@@ -24,6 +24,16 @@ class PawaPay_Api
         ];
     }
 
+    public function get_base_url()
+    {
+        return $this->base_url;
+    }
+
+    public function get_headers()
+    {
+        return $this->headers();
+    }
+
     public function create_payment_page($payload)
     {
         $url = $this->base_url . '/paymentpage';
