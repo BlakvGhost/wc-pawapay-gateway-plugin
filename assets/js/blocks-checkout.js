@@ -1,32 +1,28 @@
 const { registerPaymentMethod } = window.wc.wcBlocksRegistry;
-const { decodeEntities } = window.wp.htmlEntities;
 const { getSetting } = window.wc.wcSettings;
+const { createElement } = window.wp.element;
+const { decodeEntities } = window.wp.htmlEntities;
 
 const settings = getSetting('pawapay_data', {});
-const defaultLabel = decodeEntities(settings.title) || 'PawaPay';
 
-const Label = (props) => {
-    const { PaymentMethodLabel } = window.wc.components;
-    const label = props.title || defaultLabel;
-
-    return React.createElement(PaymentMethodLabel, {
-        text: label,
-        icon: null,
-    });
+const PawaPayComponent = () => {
+    const description = decodeEntities(settings.description || '');
+    // Retourne null si pas de description, pour un affichage plus propre.
+    return description ? createElement('div', null, description) : null;
 };
 
-registerPaymentMethod({
+const label = decodeEntities(settings.title || 'Mobile Money (PawaPay)');
+
+const pawapayPaymentMethod = {
     name: 'pawapay',
-    label: React.createElement(Label, null),
-    ariaLabel: 'PawaPay',
+    label: label,
+    content: createElement(PawaPayComponent, null),
+    edit: createElement(PawaPayComponent, null),
     canMakePayment: () => true,
-    content: React.createElement('div', null,
-        decodeEntities(settings.description || '')
-    ),
-    edit: React.createElement('div', null,
-        decodeEntities(settings.description || '')
-    ),
+    ariaLabel: label,
     supports: {
-        features: settings.supports || [],
+        features: settings.supports || ['products'],
     },
-});
+};
+
+registerPaymentMethod(pawapayPaymentMethod);

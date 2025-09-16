@@ -1,126 +1,120 @@
 <?php
 /*
 Plugin Name: WooCommerce PawaPay Gateway
-Description: Paiement mobile via PawaPay pour WooCommerce (avec conversion automatique vers XOF/XAF).
-Version: 1.2.2
+Description: Paiement mobile via la page de paiement PawaPay pour WooCommerce.
+Version: 2.1.0
 Author: Ferray Digital Solutions
 Requires at least: 5.6
 WC requires at least: 5.5
-WC tested up to: 7.0
+WC tested up to: 8.0
 */
 
-if (! defined('ABSPATH')) {
+if (!defined('ABSPATH')) {
     exit;
 }
 
-// Déclarer la compatibilité avec WooCommerce
-add_action('before_woocommerce_init', function () {
-    if (class_exists('\Automattic\WooCommerce\Utilities\FeaturesUtil')) {
-        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('custom_order_tables', __FILE__, true);
-        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('cart_checkout_blocks', __FILE__, true);
-    }
-});
+// Définir une constante pour le chemin du plugin, très utile pour la robustesse
+define('WC_PAWAPAY_PLUGIN_FILE', __FILE__);
 
-add_action('plugins_loaded', 'wc_pawapay_init_gateway', 11);
-
+/**
+ * Fonction principale d'initialisation du plugin.
+ */
 function wc_pawapay_init_gateway()
 {
-    if (!class_exists('WC_Payment_Gateway')) return;
+    if (!class_exists('WC_Payment_Gateway')) {
+        return;
+    }
 
-    require_once __DIR__ . '/includes/class-wc-gateway-pawapay.php';
+    // Charger les classes principales
     require_once __DIR__ . '/includes/class-pawapay-api.php';
+    require_once __DIR__ . '/includes/class-wc-gateway-pawapay.php';
 
+    // Ajouter la passerelle à la liste de WooCommerce
     add_filter('woocommerce_payment_gateways', function ($gateways) {
         $gateways[] = 'WC_Gateway_PawaPay';
         return $gateways;
     });
+}
+add_action('plugins_loaded', 'wc_pawapay_init_gateway');
 
-    // Déclarer la compatibilité avec les blocs
-    add_action('woocommerce_blocks_loaded', function () {
-        if (class_exists('Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType')) {
-            require_once __DIR__ . '/includes/class-wc-pawapay-blocks-support.php';
-            add_action(
-                'woocommerce_blocks_payment_method_type_registration',
-                function ($payment_method_registry) {
-                    $payment_method_registry->register(new WC_PawaPay_Blocks_Support());
-                }
-            );
+/**
+ * Enregistrement de l'intégration avec les Blocs WooCommerce.
+ * C'est la section cruciale qui résout le problème.
+ */
+function wc_pawapay_blocks_support()
+{
+    if (!class_exists('Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType')) {
+        return;
+    }
+
+    require_once __DIR__ . '/includes/class-wc-pawapay-blocks-support.php';
+
+    // Le hook que vous suspectiez ! Celui-ci est le bon pour enregistrer notre classe de support.
+    add_action(
+        'woocommerce_blocks_payment_method_type_registration',
+        function (Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry) {
+            $payment_method_registry->register(new WC_PawaPay_Blocks_Support());
         }
-    });
+    );
 }
+// Nous utilisons 'woocommerce_blocks_loaded' pour nous assurer que tout est prêt avant d'essayer d'enregistrer notre méthode.
+add_action('woocommerce_blocks_loaded', 'wc_pawapay_blocks_support');
 
-add_action('wp_ajax_pawapay_get_providers', 'pawapay_get_providers_ajax');
-add_action('wp_ajax_nopriv_pawapay_get_providers', 'pawapay_get_providers_ajax');
-
-function pawapay_get_providers_ajax()
+/**
+ * Enregistrement de l'endpoint pour le webhook.
+ */
+function pawapay_register_webhook_route()
 {
-    check_ajax_referer('pawapay_nonce', 'security');
-
-    $country = sanitize_text_field($_POST['country']);
-
-    // Récupérer le gateway PawaPay
-    $gateway = new WC_Gateway_PawaPay();
-    $client = $gateway->client;
-
-    $response = $client->provider_availability($country);
-
-    if (is_wp_error($response)) {
-        wp_send_json_error(['message' => $response->get_error_message()]);
-        return;
-    }
-
-    $code = wp_remote_retrieve_response_code($response);
-    $body = wp_remote_retrieve_body($response);
-
-    if ($code !== 200) {
-        wp_send_json_error(['message' => 'Erreur API PawaPay: Code ' . $code]);
-        return;
-    }
-
-    $data = json_decode($body, true);
-
-    if (empty($data) || !isset($data[0]['providers'])) {
-        wp_send_json_error(['message' => 'Aucun opérateur disponible']);
-        return;
-    }
-
-    wp_send_json_success(['providers' => $data[0]['providers']]);
+    register_rest_route('pawapay/v1', '/webhook', [
+        'methods'             => 'POST',
+        'callback'            => 'pawapay_handle_webhook',
+        'permission_callback' => '__return_true',
+    ]);
 }
+add_action('rest_api_init', 'pawapay_register_webhook_route');
 
-// Localisation des scripts
-add_action('wp_enqueue_scripts', 'pawapay_localize_scripts');
-
-function pawapay_localize_scripts()
+/**
+ * Gère les notifications de webhook de PawaPay.
+ */
+function pawapay_handle_webhook(WP_REST_Request $request)
 {
-    if (is_checkout() || is_wc_endpoint_url('order-pay')) {
-        wp_register_script('pawapay-checkout', plugin_dir_url(__FILE__) . 'assets/js/pawapay-checkout.js', ['jquery'], '1.0.0', true);
-        wp_register_style('pawapay-checkout', plugin_dir_url(__FILE__) . 'assets/css/pawapay-checkout.css', [], '1.0.0');
+    $body = $request->get_json_params();
+    $logger = wc_get_logger();
+    $logger->info('Webhook PawaPay reçu: ' . wp_json_encode($body), ['source' => 'pawapay']);
 
-        wp_enqueue_script('pawapay-checkout');
-        wp_enqueue_style('pawapay-checkout');
+    if (!isset($body['paymentPageId']) || !isset($body['status'])) {
+        return new WP_Error('missing_data', 'Données de webhook invalides', ['status' => 400]);
+    }
 
-        wp_localize_script('pawapay-checkout', 'pawapay_vars', [
-            'ajax_url' => admin_url('admin-ajax.php'),
-            'ajax_nonce' => wp_create_nonce('pawapay_nonce'),
-            'select_country_first' => __('Veuillez d\'abord sélectionner un pays', 'woocommerce'),
-            'loading_providers' => __('Chargement des opérateurs...', 'woocommerce'),
-            'select_provider' => __('Sélectionnez un opérateur', 'woocommerce'),
-            'no_providers' => __('Aucun opérateur disponible', 'woocommerce'),
-            'error_loading' => __('Erreur lors du chargement', 'woocommerce'),
-        ]);
-    }
-}
+    $payment_page_id = sanitize_text_field($body['paymentPageId']);
+    list($order_id) = explode('_', $payment_page_id);
 
-add_action('woocommerce_rest_checkout_process_payment_with_context', 'pawapay_save_custom_fields', 10, 2);
-function pawapay_save_custom_fields($context, $payment_result)
-{
-    if (isset($_POST['pawapay_country'])) {
-        $context->payment_data['pawapay_country'] = sanitize_text_field($_POST['pawapay_country']);
+    $order = wc_get_order($order_id);
+
+    if (!$order) {
+        $logger->error('Webhook PawaPay: Commande non trouvée pour ID: ' . $order_id, ['source' => 'pawapay']);
+        return new WP_Error('order_not_found', 'Commande non trouvée', ['status' => 404]);
     }
-    if (isset($_POST['pawapay_provider'])) {
-        $context->payment_data['pawapay_provider'] = sanitize_text_field($_POST['pawapay_provider']);
+
+    if ($order->is_paid() || in_array($order->get_status(), ['processing', 'completed', 'failed'])) {
+        return new WP_REST_Response(['status' => 'success', 'message' => 'Commande déjà traitée'], 200);
     }
-    if (isset($_POST['pawapay_phone'])) {
-        $context->payment_data['pawapay_phone'] = sanitize_text_field($_POST['pawapay_phone']);
+
+    $transaction_id = isset($body['depositId']) ? sanitize_text_field($body['depositId']) : null;
+
+    switch ($body['status']) {
+        case 'COMPLETED':
+            $order->add_order_note(__('Paiement PawaPay réussi. ID de transaction: ', 'woocommerce') . $transaction_id);
+            $order->payment_complete($transaction_id);
+            break;
+        case 'FAILED':
+            $reason = isset($body['failureReason']) ? sanitize_text_field($body['failureReason']) : 'Inconnue';
+            $order->update_status('failed', sprintf(__('Le paiement PawaPay a échoué. Raison: %s', 'woocommerce'), $reason));
+            break;
+        case 'CANCELLED':
+            $order->update_status('cancelled', __('Le paiement PawaPay a été annulé.', 'woocommerce'));
+            break;
     }
+
+    return new WP_REST_Response(['status' => 'success'], 200);
 }

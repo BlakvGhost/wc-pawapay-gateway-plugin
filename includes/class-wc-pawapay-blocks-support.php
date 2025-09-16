@@ -3,10 +3,12 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class WC_PawaPay_Blocks_Support extends Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType
+use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
+
+final class WC_PawaPay_Blocks_Support extends AbstractPaymentMethodType
 {
+
     protected $name = 'pawapay';
-    protected $settings;
 
     public function initialize()
     {
@@ -15,21 +17,29 @@ class WC_PawaPay_Blocks_Support extends Automattic\WooCommerce\Blocks\Payments\I
 
     public function is_active()
     {
-        return !empty($this->settings['enabled']) && 'yes' === $this->settings['enabled'];
+        $gateways = WC()->payment_gateways->payment_gateways();
+        return isset($gateways[$this->name]) && $gateways[$this->name]->is_available();
     }
 
     public function get_payment_method_script_handles()
     {
+        $script_path = dirname(WC_PAWAPAY_PLUGIN_FILE) . '/assets/js/blocks-checkout.js';
+        $script_url = plugin_dir_url(WC_PAWAPAY_PLUGIN_FILE) . 'assets/js/blocks-checkout.js';
+        $script_asset_path = dirname(WC_PAWAPAY_PLUGIN_FILE) . '/assets/js/blocks-checkout.asset.php';
+
+        $dependencies = ['wc-blocks-registry', 'wc-settings', 'wp-element', 'wp-html-entities'];
+        $version = '1.0.0';
+        if (file_exists($script_asset_path)) {
+            $asset = require($script_asset_path);
+            $dependencies = $asset['dependencies'];
+            $version = $asset['version'];
+        }
+
         wp_register_script(
             'wc-pawapay-blocks',
-            plugin_dir_url(__FILE__) . '../assets/js/blocks-checkout.js',
-            [
-                'wc-blocks-registry',
-                'wc-settings',
-                'wp-element',
-                'wp-html-entities',
-            ],
-            '1.0.0',
+            $script_url,
+            $dependencies,
+            $version,
             true
         );
 
@@ -39,17 +49,8 @@ class WC_PawaPay_Blocks_Support extends Automattic\WooCommerce\Blocks\Payments\I
     public function get_payment_method_data()
     {
         return [
-            'title' => $this->settings['title'] ?? 'Mobile Money (PawaPay)',
-            'description' => $this->settings['description'] ?? 'Payer avec Mobile Money via PawaPay.',
-            'supports' => $this->get_supported_features(),
-            'countries' => ['BJ', 'BF', 'CI', 'CM', 'ML', 'NE', 'SN', 'TG'],
-        ];
-    }
-
-    public function get_supported_features()
-    {
-        return [
-            'products',
+            'title'       => $this->get_setting('title', 'Mobile Money (PawaPay)'),
+            'description' => $this->get_setting('description', 'Vous serez redirigé pour payer via PawaPay.'),
         ];
     }
 }

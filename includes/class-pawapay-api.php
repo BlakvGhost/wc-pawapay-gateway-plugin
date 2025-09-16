@@ -24,9 +24,9 @@ class PawaPay_Api
         ];
     }
 
-    public function initiate_deposit($payload)
+    public function create_payment_page($payload)
     {
-        $url = $this->base_url . '/deposits';
+        $url = $this->base_url . '/paymentpage';
 
         $args = [
             'headers' => $this->headers(),
@@ -36,34 +36,12 @@ class PawaPay_Api
 
         $response = wp_remote_post($url, $args);
 
-        // Logging pour le débogage
+        $logger = wc_get_logger();
         if (is_wp_error($response)) {
-            $logger = wc_get_logger();
-            $logger->error('PawaPay API Error: ' . $response->get_error_message(), ['source' => 'pawapay']);
+            $logger->error('PawaPay API Error (Payment Page): ' . $response->get_error_message(), ['source' => 'pawapay']);
         } else {
-            $logger = wc_get_logger();
-            $logger->info('PawaPay Deposit Request: ' . wp_json_encode($payload), ['source' => 'pawapay']);
-            $logger->info('PawaPay Deposit Response: ' . wp_remote_retrieve_body($response), ['source' => 'pawapay']);
-        }
-
-        return $response;
-    }
-
-    public function provider_availability($country)
-    {
-        $url = $this->base_url . '/provider-availability?country=' . urlencode($country);
-
-        $args = [
-            'headers' => $this->headers(),
-            'timeout' => 30,
-        ];
-
-        $response = wp_remote_get($url, $args);
-
-        // Logging pour le débogage
-        if (is_wp_error($response)) {
-            $logger = wc_get_logger();
-            $logger->error('PawaPay Provider Availability Error: ' . $response->get_error_message(), ['source' => 'pawapay']);
+            $logger->info('PawaPay Payment Page Request: ' . wp_json_encode($payload), ['source' => 'pawapay']);
+            $logger->info('PawaPay Payment Page Response: ' . wp_remote_retrieve_body($response), ['source' => 'pawapay']);
         }
 
         return $response;
