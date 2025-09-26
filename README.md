@@ -1,6 +1,6 @@
-# WC PawaPay Gateway Plugin
+# Cyberka PawaPay Gateway Plugin
 
-A WooCommerce payment gateway plugin that integrates **Mobile Money payments** via the **PawaPay API** with automatic currency conversion.  
+A WordPress payment gateway plugin that integrates **Mobile Money payments** via the **PawaPay API** with automatic currency conversion.  
 It supports multi-country, multi-operator payments and ensures secure transaction validation using webhooks and return URLs.
 
 ---
@@ -13,7 +13,6 @@ It supports multi-country, multi-operator payments and ensures secure transactio
 - ✅ Supports both **free** and **API key-based** exchange rate providers
 - ✅ Country and operator selection at checkout
 - ✅ Mobile operator logos at checkout
-- ✅ Compatible with WooCommerce Blocks editor
 - ✅ Multi-country support (West & Central Africa)
 - ✅ Sandbox and Production modes
 - ✅ Webhook support for secure payment status validation
@@ -186,13 +185,14 @@ This means your customers **cannot bypass failed transactions**, as the order is
 
 1. Check [PawaPay Documentation](https://docs.pawapay.io/v2/docs)  
 2. Open an issue on the GitHub repository  
-3. Contact [Kabirou ALASSANE](https://kabiroualassane.link) 
+3. Contact [Kabirou ALASSANE](https://kabiroualassane.link)
 
 ---
 
 ## License
 
-This plugin is licensed under **GPL v3.0**. See the `LICENSE` file for details.
+This plugin is licensed under the GNU General Public License v3.0 (GPLv3) or later.  
+You can redistribute it and/or modify it under the terms of the GPL as published by the Free Software Foundation.
 
 ---
 

@@ -15,9 +15,9 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
     public function __construct()
     {
         $this->id = 'pawapay';
-        $this->icon = '';
+        $this->icon = plugins_url('pawapay.png', WC_PAWAPAY_PLUGIN_FILE);
         $this->method_title = 'PawaPay';
-        $this->method_description = 'Paiement mobile via la page de paiement PawaPay.';
+        $this->method_description = 'Acceptez les paiements Mobile Money via la passerelle sécurisée PawaPay. Compatible multi-pays et multi-opérateurs.';
 
         $this->has_fields = true;
 

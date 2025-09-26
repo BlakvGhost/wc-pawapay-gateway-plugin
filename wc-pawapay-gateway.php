@@ -1,15 +1,15 @@
 <?php
 /*
-Plugin Name: WooCommerce PawaPay Gateway
+Plugin Name: Cyberka PawaPay Gateway
 Description: Integrates Mobile Money payments via the PawaPay Payment Page into WooCommerce. Supports multi-country, multi-operator payments with automatic currency conversion (XOF/XAF/EUR/USD) and optional ExchangeRate API integration.
 Version: 1.0.0
-Author: Kabirou ALASSANE
-Author URI: https://kabiroualassane.link
+Author: Cyberka
+Author URI: https://cyberka.com
+License: GPLv3 or later
+License URI: https://www.gnu.org/licenses/gpl-3.0.html
 Requires at least: 5.6
 WC requires at least: 5.5
 WC tested up to: 8.0
-Text Domain: wc-pawapay-gateway
-Domain Path: /languages
 */
 
 
