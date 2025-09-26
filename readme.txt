@@ -1,5 +1,5 @@
-=== Cyberka PawaPay Gateway ===
-Contributors: Kabirou ALASSANE, Cyberka
+=== WooCommerce PawaPay Gateway ===
+Contributors: Kabirou ALASSANE
 Tags: plugin, payment gateway, mobile money, pawapay, cfa
 Requires at least: 5.6
 Tested up to: 8.0

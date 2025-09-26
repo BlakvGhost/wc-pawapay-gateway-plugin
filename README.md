@@ -1,4 +1,4 @@
-# Cyberka PawaPay Gateway Plugin
+# WooCommerce PawaPay Gateway Plugin
 
 A WordPress payment gateway plugin that integrates **Mobile Money payments** via the **PawaPay API** with automatic currency conversion.  
 It supports multi-country, multi-operator payments and ensures secure transaction validation using webhooks and return URLs.
