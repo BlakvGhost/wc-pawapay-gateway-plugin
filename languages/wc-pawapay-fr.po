@@ -1,0 +1,183 @@
+# Copyright (C) 2025 Kabirou ALASSANE
+# This file is distributed under the GPLv3 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: WooCommerce PawaPay Gateway 1.0.1\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wc-pawapay-"
+"gateway\n"
+"POT-Creation-Date: 2025-09-29T12:12:38+00:00\n"
+"PO-Revision-Date: 2025-09-29 13:30+0100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.7\n"
+"X-Domain: wc-pawapay\n"
+
+#. Plugin Name of the plugin
+#: wc-pawapay-gateway.php
+msgid "WooCommerce PawaPay Gateway"
+msgstr "WooCommerce PawaPay Gateway"
+
+#. Description of the plugin
+#: wc-pawapay-gateway.php
+msgid ""
+"Integrates Mobile Money payments via the PawaPay Payment Page into "
+"WooCommerce. Supports multi-country, multi-operator payments with automatic "
+"currency conversion (XOF/XAF/EUR/USD) and optional ExchangeRate API "
+"integration."
+msgstr ""
+"Intègre les paiements mobiles via la page de paiement PawaPay dans "
+"WooCommerce. Prend en charge les paiements multi-pays et multi-opérateurs "
+"avec conversion automatique des devises (XOF/XAF/EUR/USD) et intégration "
+"optionnelle de l'API ExchangeRate."
+
+#. Author of the plugin
+#: wc-pawapay-gateway.php
+msgid "Kabirou ALASSANE"
+msgstr "Kabirou ALASSANE"
+
+#. Author URI of the plugin
+#: wc-pawapay-gateway.php
+msgid "https://kabiroualassane.link"
+msgstr "https://kabiroualassane.link"
+
+#: includes/class-wc-gateway-pawapay.php:48
+msgid "Activer/Désactiver"
+msgstr "Activer/Désactiver"
+
+#: includes/class-wc-gateway-pawapay.php:50
+msgid "Activer PawaPay"
+msgstr "Activer PawaPay"
+
+#: includes/class-wc-gateway-pawapay.php:54
+msgid "Titre"
+msgstr "Titre"
+
+#: includes/class-wc-gateway-pawapay.php:56
+msgid "Mobile Money (PawaPay)"
+msgstr "Mobile Money (PawaPay)"
+
+#: includes/class-wc-gateway-pawapay.php:59
+msgid "Description"
+msgstr "Description"
+
+#: includes/class-wc-gateway-pawapay.php:61
+msgid ""
+"Vous serez redirigé vers une page sécurisée pour finaliser votre paiement."
+msgstr ""
+"Vous serez redirigé vers une page sécurisée pour finaliser votre paiement."
+
+#: includes/class-wc-gateway-pawapay.php:64
+msgid "API Token"
+msgstr "API Token"
+
+#: includes/class-wc-gateway-pawapay.php:68
+msgid "Environnement"
+msgstr "Environnement"
+
+#: includes/class-wc-gateway-pawapay.php:71
+msgid "Sandbox"
+msgstr "Sandbox"
+
+#: includes/class-wc-gateway-pawapay.php:72
+msgid "Production"
+msgstr "Production"
+
+#: includes/class-wc-gateway-pawapay.php:77
+msgid "Langue de la page de paiement"
+msgstr "Langue de la page de paiement"
+
+#: includes/class-wc-gateway-pawapay.php:80
+msgid "Français"
+msgstr "Français"
+
+#: includes/class-wc-gateway-pawapay.php:81
+msgid "Anglais"
+msgstr "Anglais"
+
+#: includes/class-wc-gateway-pawapay.php:86
+msgid "Clé API ExchangeRate"
+msgstr "Clé API ExchangeRate"
+
+#: includes/class-wc-gateway-pawapay.php:88
+msgid ""
+"Entrez votre clé API ExchangeRate. Laissez vide pour utiliser la version "
+"gratuite (non garantie en production)."
+msgstr ""
+"Entrez votre clé API ExchangeRate. Laissez vide pour utiliser la version "
+"gratuite (non garantie en production)."
+
+#: includes/class-wc-gateway-pawapay.php:144
+#: includes/class-wc-gateway-pawapay.php:184
+msgid "Sélectionnez une devise"
+msgstr "Sélectionnez une devise"
+
+#: includes/class-wc-gateway-pawapay.php:157
+msgid "Erreur: Impossible de charger les pays supportés."
+msgstr "Erreur: Impossible de charger les pays supportés."
+
+#: includes/class-wc-gateway-pawapay.php:173
+msgid "Pays"
+msgstr "Pays"
+
+#: includes/class-wc-gateway-pawapay.php:175
+msgid "Sélectionnez un pays"
+msgstr "Sélectionnez un pays"
+
+#: includes/class-wc-gateway-pawapay.php:182
+msgid "Devise"
+msgstr "Devise"
+
+#: includes/class-wc-gateway-pawapay.php:188
+msgid "Le montant total de votre commande de "
+msgstr "Le montant total de votre commande de "
+
+#: includes/class-wc-gateway-pawapay.php:190
+msgid " sera converti et payé en "
+msgstr " sera converti et payé en "
+
+#: includes/class-wc-gateway-pawapay.php:225
+msgid "Veuillez sélectionner un pays et une devise."
+msgstr "Veuillez sélectionner un pays et une devise."
+
+#: includes/class-wc-gateway-pawapay.php:232
+#: includes/class-wc-gateway-pawapay.php:324
+msgid "Erreur de conversion de devise."
+msgstr "Erreur de conversion de devise."
+
+#: includes/class-wc-gateway-pawapay.php:244
+#, php-format
+msgid "Paiement pour %s"
+msgstr "Paiement pour %s"
+
+#: includes/class-wc-gateway-pawapay.php:247
+#, php-format
+msgid "Paiement pour %s et %d autres articles"
+msgstr "Paiement pour %s et %d autres articles"
+
+#: includes/class-wc-gateway-pawapay.php:276
+msgid "Erreur de communication avec PawaPay: "
+msgstr "Erreur de communication avec PawaPay: "
+
+#: includes/class-wc-gateway-pawapay.php:285
+msgid "Le paiement a été rejeté par PawaPay."
+msgstr "Le paiement a été rejeté par PawaPay."
+
+#: includes/class-wc-gateway-pawapay.php:287
+msgid "Raison:"
+msgstr "Raison:"
+
+#: includes/class-wc-gateway-pawapay.php:294
+msgid "En attente de paiement sur la page PawaPay."
+msgstr "En attente de paiement sur la page PawaPay."
+
+#: includes/class-wc-gateway-pawapay.php:330
+msgid "Devise cible non disponible."
+msgstr "Devise cible non disponible."
+
+#: includes/class-wc-gateway-pawapay.php:345
+msgid "Nonce de sécurité invalide."
+msgstr "Nonce de sécurité invalide."

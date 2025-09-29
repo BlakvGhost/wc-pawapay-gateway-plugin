@@ -20,7 +20,7 @@ jQuery(document).ready(function ($) {
 
     function updateCurrencyDropdown(countryCode) {
         $currencySelect = $('#pawapay_currency');
-        $currencySelect.empty().append('<option value="">Sélectionnez une devise</option>');
+        $currencySelect.empty().append('<option value="">' + pawapayData.i18n.select_currency + '</option>');
         $convertedAmountDiv.hide();
 
         if (!countryCode) {

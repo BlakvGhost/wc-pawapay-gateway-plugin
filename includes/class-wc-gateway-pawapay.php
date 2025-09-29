@@ -45,53 +45,53 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
     {
         $this->form_fields = [
             'enabled' => [
-                'title'   => 'Activer/Désactiver',
+                'title'   => __('Activer/Désactiver', 'wc-pawapay'),
                 'type'    => 'checkbox',
-                'label'   => 'Activer PawaPay',
+                'label'   => __('Activer PawaPay', 'wc-pawapay'),
                 'default' => 'no'
             ],
             'title' => [
-                'title'       => 'Titre',
+                'title'       => __('Titre', 'wc-pawapay'),
                 'type'        => 'text',
-                'default'     => 'Mobile Money (PawaPay)',
+                'default'     => __('Mobile Money (PawaPay)', 'wc-pawapay'),
             ],
             'description' => [
-                'title'       => 'Description',
+                'title'       => __('Description', 'wc-pawapay'),
                 'type'        => 'textarea',
-                'default'     => 'Vous serez redirigé vers une page sécurisée pour finaliser votre paiement.',
+                'default'     => __('Vous serez redirigé vers une page sécurisée pour finaliser votre paiement.', 'wc-pawapay'),
             ],
             'api_token' => [
-                'title'       => 'API Token',
+                'title'       => __('API Token', 'wc-pawapay'),
                 'type'        => 'password',
             ],
             'environment' => [
-                'title'       => 'Environnement',
+                'title'       => __('Environnement', 'wc-pawapay'),
                 'type'        => 'select',
                 'options'     => [
-                    'sandbox'    => 'Sandbox',
-                    'production' => 'Production'
+                    'sandbox'    => __('Sandbox', 'wc-pawapay'),
+                    'production' => __('Production', 'wc-pawapay')
                 ],
                 'default' => 'sandbox',
             ],
             'language' => [
-                'title'       => 'Langue de la page de paiement',
+                'title'       => __('Langue de la page de paiement', 'wc-pawapay'),
                 'type'        => 'select',
                 'options'     => [
-                    'fr'    => 'Français',
-                    'en' => 'Anglais'
+                    'fr'    => __('Français', 'wc-pawapay'),
+                    'en' => __('Anglais', 'wc-pawapay')
                 ],
                 'default' => 'fr',
             ],
             'exchange_api_key' => [
-                'title'       => 'Clé API ExchangeRate',
+                'title'       => __('Clé API ExchangeRate', 'wc-pawapay'),
                 'type'        => 'password',
-                'description' => 'Entrez votre clé API ExchangeRate. Laissez vide pour utiliser la version gratuite (non garantie en production).',
+                'description' => __('Entrez votre clé API ExchangeRate. Laissez vide pour utiliser la version gratuite (non garantie en production).', 'wc-pawapay'),
                 'default'     => '',
                 'desc_tip'    => true,
             ],
-
         ];
     }
+
 
     public function get_active_configuration_countries()
     {
@@ -140,6 +140,9 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
             'nonce' => wp_create_nonce('pawapay_nonce'),
             'order_total' => WC()->cart->get_total('edit'),
             'current_currency' => get_woocommerce_currency(),
+            'i18n' => [
+                'select_currency' => __('Sélectionnez une devise', 'wc-pawapay'),
+            ],
         ]);
     }
 
@@ -151,7 +154,7 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
 
         $config = $this->get_active_configuration_countries();
         if (is_wp_error($config)) {
-            echo '<p>' . esc_html__('Erreur: Impossible de charger les pays supportés.', 'woocommerce') . '</p>';
+            echo '<p>' . esc_html__('Erreur: Impossible de charger les pays supportés.', 'wc-pawapay') . '</p>';
             return;
         }
 
@@ -167,24 +170,24 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
 
 ?>
         <p class="form-row form-row-wide">
-            <label for="pawapay_country"><?php esc_html_e('Pays', 'woocommerce'); ?> <span class="required">*</span></label>
+            <label for="pawapay_country"><?php esc_html_e('Pays', 'wc-pawapay'); ?> <span class="required">*</span></label>
             <select id="pawapay_country" name="wc-pawapay-new-payment-method[pawapay_country]" class="wc-pawapay-country-select" required>
-                <option value=""><?php esc_html_e('Sélectionnez un pays', 'woocommerce'); ?></option>
+                <option value=""><?php esc_html_e('Sélectionnez un pays', 'wc-pawapay'); ?></option>
                 <?php foreach ($country_options as $code => $name) : ?>
                     <option value="<?php echo esc_attr($code); ?>"><?php echo esc_html($name); ?></option>
                 <?php endforeach; ?>
             </select>
         </p>
         <p class="form-row form-row-wide">
-            <label for="pawapay_currency"><?php esc_html_e('Devise', 'woocommerce'); ?> <span class="required">*</span></label>
+            <label for="pawapay_currency"><?php esc_html_e('Devise', 'wc-pawapay'); ?> <span class="required">*</span></label>
             <select id="pawapay_currency" name="wc-pawapay-new-payment-method[pawapay_currency]" class="wc-pawapay-currency-select" required>
-                <option value=""><?php esc_html_e('Sélectionnez une devise', 'woocommerce'); ?></option>
+                <option value=""><?php esc_html_e('Sélectionnez une devise', 'wc-pawapay'); ?></option>
             </select>
         </p>
         <div class="pawapay-converted-amount" style="display: none;">
-            <p><?php esc_html_e('Le montant total de votre commande de ', 'woocommerce'); ?>
+            <p><?php esc_html_e('Le montant total de votre commande de ', 'wc-pawapay'); ?>
                 <span class="pawapay-order-total"></span>
-                <?php esc_html_e(' sera converti et payé en ', 'woocommerce'); ?>
+                <?php esc_html_e(' sera converti et payé en ', 'wc-pawapay'); ?>
                 <strong class="pawapay-converted-total"></strong>
             </p>
         </div>
@@ -219,14 +222,14 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
         }
 
         if (empty($country_code) || empty($currency_code)) {
-            wc_add_notice(__('Veuillez sélectionner un pays et une devise.', 'woocommerce'), 'error');
+            wc_add_notice(__('Veuillez sélectionner un pays et une devise.', 'wc-pawapay'), 'error');
             return ['result' => 'failure'];
         }
 
         $order_total = $order->get_total();
         $converted_amount = $this->convert_currency(get_woocommerce_currency(), $currency_code, $order_total);
         if (is_wp_error($converted_amount)) {
-            wc_add_notice(__('Erreur de conversion de devise.', 'woocommerce'), 'error');
+            wc_add_notice(__('Erreur de conversion de devise.', 'wc-pawapay'), 'error');
             return ['result' => 'failure'];
         }
 
@@ -238,9 +241,13 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
         }
 
         if (count($product_names) === 1) {
-            $reason = 'Paiement pour ' . $product_names[0];
+            $reason = sprintf(__('Paiement pour %s', 'wc-pawapay'), $product_names[0]);
         } else {
-            $reason = 'Paiement pour ' . $product_names[0] . ' et ' . (count($product_names) - 1) . ' autres articles';
+            $reason = sprintf(
+                __('Paiement pour %s et %d autres articles', 'wc-pawapay'),
+                $product_names[0],
+                count($product_names) - 1
+            );
         }
 
         $payment_page_id = $this->generateUuidV4();
@@ -266,7 +273,7 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
 
         $resp = $this->client->create_payment_page($payload);
         if (is_wp_error($resp)) {
-            wc_add_notice(__('Erreur de communication avec PawaPay: ', 'woocommerce') . $resp->get_error_message(), 'error');
+            wc_add_notice(__('Erreur de communication avec PawaPay: ', 'wc-pawapay') . $resp->get_error_message(), 'error');
             return ['result' => 'failure'];
         }
 
@@ -275,16 +282,16 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
         $data = json_decode($body, true);
 
         if ($code !== 201 || empty($data['redirectUrl'])) {
-            $error_message = __('Le paiement a été rejeté par PawaPay.', 'woocommerce');
+            $error_message = __('Le paiement a été rejeté par PawaPay.', 'wc-pawapay');
             if (!empty($data['message'])) {
-                $error_message .= ' Raison: ' . esc_html($data['message']);
+                $error_message .= ' ' . __('Raison:', 'wc-pawapay') . ' ' . esc_html($data['message']);
             }
             wc_add_notice($error_message, 'error');
             return ['result' => 'failure'];
         }
 
         $order->update_meta_data('_pawapay_payment_page_id', $payment_page_id);
-        $order->update_status('pending', __('En attente de paiement sur la page PawaPay.', 'woocommerce'));
+        $order->update_status('pending', __('En attente de paiement sur la page PawaPay.', 'wc-pawapay'));
         $order->save();
 
         return [
@@ -314,13 +321,13 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
             $response = wp_remote_get($url);
 
             if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
-                return new WP_Error('conversion_error', 'Erreur de conversion de devise.');
+                return new WP_Error('conversion_error', __('Erreur de conversion de devise.', 'wc-pawapay'));
             }
 
             $data = json_decode(wp_remote_retrieve_body($response), true);
 
             if (!isset($data['rates'][$to]) && !isset($data['conversion_rates'][$to])) {
-                return new WP_Error('conversion_error', 'Devise cible non disponible.');
+                return new WP_Error('conversion_error', __('Devise cible non disponible.', 'wc-pawapay'));
             }
 
             $rate = $data['rates'][$to] ?? $data['conversion_rates'][$to];
@@ -335,7 +342,7 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
     public function ajax_convert_currency()
     {
         if (!check_ajax_referer('pawapay_nonce', 'nonce', false)) {
-            wp_send_json_error('Nonce de sécurité invalide.');
+            wp_send_json_error(__('Nonce de sécurité invalide.', 'wc-pawapay'));
             wp_die();
         }
 

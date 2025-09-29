@@ -7,6 +7,8 @@ Author: Kabirou ALASSANE
 Author URI: https://kabiroualassane.link
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
+Text Domain: wc-pawapay
+Domain Path: /languages
 Requires at least: 5.6
 WC requires at least: 5.5
 WC tested up to: 8.0
@@ -18,6 +20,15 @@ if (!defined('ABSPATH')) {
 }
 
 define('WC_PAWAPAY_PLUGIN_FILE', __FILE__);
+
+function wc_pawapay_load_textdomain() {
+    load_plugin_textdomain(
+        'wc-pawapay',
+        false,
+        dirname(plugin_basename(WC_PAWAPAY_PLUGIN_FILE)) . '/languages/'
+    );
+}
+add_action('plugins_loaded', 'wc_pawapay_load_textdomain');
 
 function wc_pawapay_init_gateway()
 {
