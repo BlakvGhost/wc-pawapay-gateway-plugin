@@ -11,6 +11,7 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
     public $merchant_name;
     public $exchange_api_key;
     public $language;
+    public $uniqueSignature;
 
     public function __construct()
     {
@@ -18,7 +19,10 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
         $this->icon = plugins_url('pawapay.png', WC_PAWAPAY_PLUGIN_FILE);
         $this->method_title = 'PawaPay';
         $this->method_description = 'Acceptez les paiements Mobile Money via la passerelle sécurisée PawaPay. Compatible multi-pays et multi-opérateurs.';
-
+        $this->supports = [
+            'products',
+            'refunds',
+        ];
         $this->has_fields = true;
 
         $this->init_form_fields();
@@ -41,6 +45,16 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
         add_action('wp_ajax_pawapay_convert_currency', [$this, 'ajax_convert_currency']);
         add_action('wp_ajax_nopriv_pawapay_convert_currency', [$this, 'ajax_convert_currency']);
     }
+
+    public function supports($feature)
+    {
+        if ($feature === 'partial-refunds') {
+            return false;
+        }
+
+        return parent::supports($feature);
+    }
+
 
     public function init_form_fields()
     {
@@ -317,9 +331,98 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
         ];
     }
 
+    /**
+     * Process a refund
+     *
+     * @param int    $order_id
+     * @param float  $amount
+     * @param string $reason
+     * @return bool|WP_Error
+     */
+    public function process_refund($order_id, $amount = null, $reason = '')
+    {
+        $order = wc_get_order($order_id);
+
+        if (! $order) {
+            return new WP_Error('invalid_order', __('Order not found.', 'wc-pawapay'));
+        }
+
+        $pawapay_deposit_id = $order->get_meta('pawapay_deposit_id');
+        $pawapay_currency = $order->get_meta('pawapay_currency');
+        $pawapay_converted_amount = $order->get_meta('pawapay_converted_amount');
+
+        if (!$pawapay_deposit_id || !$pawapay_currency || !$pawapay_converted_amount) {
+            return new WP_Error('no_transaction', __('No transaction ID or metadata found for this order.', 'wc-pawapay'));
+        }
+
+        try {
+            $client = $this->client;
+            $url    = $client->get_base_url() . '/refunds';
+
+            $refundId = $this->generateUuidV4();
+
+            $body = [
+                'amount' => $pawapay_converted_amount,
+                'currency' => $pawapay_currency,
+                'depositId' => $pawapay_deposit_id,
+                'refundId' => $refundId,
+                'metadata' => [
+                    [
+                        'order_id' => (string) $order->get_id()
+                    ],
+                    [
+                        'platform_signature' => $this->uniqueSignature
+                    ],
+                ]
+            ];
+
+            $response = wp_remote_post($url, [
+                'headers' => $client->get_headers(),
+                'body'    => wp_json_encode($body),
+                'timeout' => 30,
+            ]);
+            $logger = wc_get_logger();
+            $logger->info('PawaPay Refund Request: ' . wp_json_encode($body), ['source' => 'pawapay']);
+            if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
+                return new WP_Error('refund_failed', __('Refund failed via PawaPay API.', 'wc-pawapay'));
+            }
+
+            $data = json_decode(wp_remote_retrieve_body($response), true);
+            $logger->info('PawaPay Refund Response: ' . wp_json_encode($data), ['source' => 'pawapay']);
+
+            if (isset($data['status']) && $data['status'] === 'ACCEPTED') {
+
+                $checkUrl = "$url/$refundId";
+                $checkResponse = wp_remote_get($checkUrl, [
+                    'headers' => $client->get_headers(),
+                    'timeout' => 30,
+                ]);
+                if (is_wp_error($checkResponse) || wp_remote_retrieve_response_code($checkResponse) !== 200) {
+                    return new WP_Error('refund_check_failed', __('Failed to verify refund status via PawaPay API.', 'wc-pawapay'));
+                }
+
+                $checkData = json_decode(wp_remote_retrieve_body($checkResponse), true);
+                $logger->info('PawaPay Refund Check Response: ' . wp_json_encode($checkData), ['source' => 'pawapay']);
+                if (isset($checkData['data']['status']) && $checkData['data']['status'] !== 'COMPLETED') {
+                    return new WP_Error('refund_not_completed', __('Refund not completed yet via PawaPay API.', 'wc-pawapay'));
+                }
+
+                $order->add_order_note(sprintf(__('Refund of %s processed via PawaPay. Reason: %s', 'wc-pawapay'), wc_price($amount), $reason));
+                $order->update_meta_data('pawapay_last_refund_id', $refundId);
+                $order->save();
+                return true;
+            } else {
+                return new WP_Error('refund_failed', $data['message'] ?? __('Refund failed.', 'wc-pawapay'));
+            }
+        } catch (Exception $e) {
+            return new WP_Error('refund_error', $e->getMessage());
+        }
+    }
+
+
     public function convert_currency($from, $to, $amount)
     {
-        $cache_key   = '_fdpawapay_exchange_rate_' . $from . '_' . $to;
+        $cache_key   = '_pawapay_exchange_rate_' . $from . '_' . $to;
         $cached_rate = get_transient($cache_key);
 
         if ($cached_rate !== false) {

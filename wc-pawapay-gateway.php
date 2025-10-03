@@ -49,6 +49,7 @@ function wc_pawapay_init_gateway()
 
     require_once __DIR__ . '/includes/class-pawapay-api.php';
     require_once __DIR__ . '/includes/class-wc-gateway-pawapay.php';
+    require_once __DIR__ . '/includes/class-wc-gateway-pawapay-refunds.php';
 
     add_filter('woocommerce_payment_gateways', function ($gateways) {
         $gateways[] = 'WC_Gateway_PawaPay';
