@@ -10,7 +10,7 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
     public $client;
     public $merchant_name;
     public $exchange_api_key;
-    public $supported_countries = ['BJ', 'BF', 'CI', 'CM', 'ML', 'NE', 'SN', 'TG', 'GH', 'NG', 'ZM', 'EU', 'US', 'FR'];
+    public $language;
 
     public function __construct()
     {
@@ -29,8 +29,9 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
         $this->enabled = $this->get_option('enabled');
         $this->api_token = $this->get_option('api_token');
         $this->environment = $this->get_option('environment', 'sandbox');
-        $this->merchant_name = $this->get_option('name', 'Votre Entreprise');
+        $this->uniqueSignature = $this->get_option('uniqueSignature', 'non defini');
         $this->exchange_api_key = $this->get_option('exchange_api_key');
+        $this->language = $this->get_option('language', 'fr');
 
         require_once __DIR__ . '/class-pawapay-api.php';
         $this->client = new PawaPay_Api($this->environment, $this->api_token);
@@ -72,6 +73,13 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
                     'production' => __('Production', 'wc-pawapay')
                 ],
                 'default' => 'sandbox',
+            ],
+            'uniqueSignature' => [
+                'title'       => __('Identifiant Webhook', 'wc-pawapay'),
+                'type'        => 'text',
+                'description' => __('Entrez une valeur unique pour cette boutique. Elle sera ajoutée dans les métadonnées de chaque paiement. Si vous utilisez le même compte PawaPay sur plusieurs sites, cela vous permet d’identifier de quel site provient le webhook.(Laissez vide si cela vous concerne pas)', 'wc-pawapay'),
+                'default'     => 'identifiant-boutique',
+                'desc_tip'    => true,
             ],
             'language' => [
                 'title'       => __('Langue de la page de paiement', 'wc-pawapay'),
@@ -263,6 +271,15 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
                 'order_id'   => $order->get_id(),
                 'deposit_id' => $payment_page_id,
             ], rest_url('pawapay/v1/return')),
+            "metadata" => [
+                [
+                    "order_id" => (string) $order->get_id()
+                ],
+                [
+                    'platform_signature' => $this->uniqueSignature
+                ],
+            ],
+            'language' => strtoupper($this->language),
         ];
 
         $order->update_meta_data('pawapay_country', $country_code);
