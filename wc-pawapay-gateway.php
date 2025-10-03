@@ -21,7 +21,18 @@ if (!defined('ABSPATH')) {
 
 define('WC_PAWAPAY_PLUGIN_FILE', __FILE__);
 
-function wc_pawapay_load_textdomain() {
+add_action('before_woocommerce_init', function () {
+    if (class_exists(\Automattic\WooCommerce\Utilities\FeaturesUtil::class)) {
+        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility(
+            'custom_order_tables',
+            __FILE__,
+            true
+        );
+    }
+});
+
+function wc_pawapay_load_textdomain()
+{
     load_plugin_textdomain(
         'wc-pawapay',
         false,
@@ -123,6 +134,18 @@ function pawapay_handle_webhook(WP_REST_Request $request)
     $payment_page_id = sanitize_text_field($body['paymentPageId']);
     $order_id = $body['merchantReference'] ?? 0;
 
+    $client = $gateway->client;
+    $url    = $client->get_base_url() . '/deposits/' . $order_id;
+    $resp   = wp_remote_get($url, ['headers' => $client->get_headers(), 'timeout' => 30]);
+
+    if (is_wp_error($resp) || wp_remote_retrieve_response_code($resp) !== 200) {
+        wc_add_notice(__('Impossible de vérifier le statut du paiement(webhook).', 'woocommerce'), 'error');
+        exit;
+    }
+
+    $data   = json_decode(wp_remote_retrieve_body($resp), true);
+    $status = $data['status'] ? $data['data']['status'] : null;
+
     $order = wc_get_order($order_id);
 
     if (!$order) {
@@ -136,11 +159,13 @@ function pawapay_handle_webhook(WP_REST_Request $request)
 
     $transaction_id = isset($body['depositId']) ? sanitize_text_field($body['depositId']) : null;
 
-    switch ($body['status']) {
+    switch ($status) {
         case 'COMPLETED':
-            $order->add_order_note(__('Paiement PawaPay réussi. ID de transaction: ', 'woocommerce') . $transaction_id);
-            $order->payment_complete($transaction_id);
-            $order->update_status('processing', __('Paiement confirmé par PawaPay.', 'woocommerce'));
+            if (!$order->is_paid()) {
+                $order->add_order_note(__('Paiement PawaPay réussi. ID de transaction: ', 'woocommerce') . $transaction_id);
+                $order->payment_complete($transaction_id);
+                $order->update_status('completed', __('Paiement confirmé par PawaPay.', 'woocommerce'));
+            }
             break;
         case 'FAILED':
             $reason = isset($body['failureReason']) ? sanitize_text_field($body['failureReason']) : 'Inconnue';
@@ -164,7 +189,7 @@ function pawapay_add_styles()
 
 function pawapay_register_webhook_route()
 {
-    register_rest_route('pawapay/v1', '/webhook', [
+    register_rest_route('pawapay/v1', '/deposit-callback', [
         'methods'             => WP_REST_Server::CREATABLE,
         'callback'            => 'pawapay_handle_webhook',
         'permission_callback' => '__return_true',
@@ -219,7 +244,7 @@ function pawapay_handle_return(WP_REST_Request $request)
         case 'COMPLETED':
             if (!$order->is_paid()) {
                 $order->payment_complete($deposit_id);
-                $order->update_status('processing', __('Paiement confirmé par PawaPay (return).', 'woocommerce'));
+                $order->update_status('completed', __('Paiement confirmé par PawaPay (return).', 'woocommerce'));
             }
             wp_safe_redirect($order->get_checkout_order_received_url());
             exit;
