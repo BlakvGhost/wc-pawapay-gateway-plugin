@@ -21,38 +21,10 @@ It supports multi-country, multi-operator payments and ensures secure transactio
 
 ## Supported Countries
 
-### 🇧🇯 West Africa
+The list of supported countries is automatically retrieved from your **PawaPay account**.  
+This means that only the countries and operators that are **activated for your merchant account** will appear at checkout.  
 
-- **🇧🇯 Bénin** → XOF  
-- **🇧🇫 Burkina Faso** → XOF  
-- **🇨🇮 Côte d’Ivoire** → XOF  
-- **🇬🇭 Ghana** → GHS  
-- **🇲🇱 Mali** → XOF  
-- **🇳🇬 Nigéria** → NGN  
-- **🇸🇳 Sénégal** → XOF  
-- **🇸🇱 Sierra Leone** → SLE  
-- **🇹🇬 Togo** → XOF  
-
-### 🇨🇲 Central Africa
-
-- **🇨🇲 Cameroun** → XAF  
-- **🇨🇩 République Démocratique du Congo** → CDF  
-- **🇨🇬 République du Congo** → XAF  
-- **🇬🇦 Gabon** → XAF  
-
-### 🇰🇪 East Africa
-
-- **🇪🇹 Éthiopie** → ETB  
-- **🇰🇪 Kenya** → KES  
-- **🇲🇿 Mozambique** → MZN  
-- **🇷🇼 Rwanda** → RWF  
-- **🇹🇿 Tanzanie** → TZS  
-- **🇺🇬 Ouganda** → UGX  
-
-### 🇿🇲 Southern Africa
-
-- **🇲🇼 Malawi** → MWK  
-- **🇿🇲 Zambie** → ZMW  
+You don’t need to manually configure them — the plugin dynamically loads them from PawaPay’s API.
 
 ---
 
@@ -71,11 +43,24 @@ The plugin automatically converts from **any store currency** into the supported
 ## Installation
 
 1. Download the plugin ZIP
+   ![Download Plugin](docs/step1-download.png)
+
 2. Go to **WordPress Admin → Plugins → Add New**
+
 3. Click **Upload Plugin** and select the ZIP file
-4. Activate the plugin
-5. Go to **WooCommerce → Settings → Payments**
-6. Enable and configure **PawaPay**
+
+4. Activate the plugin  
+   ![Activate Plugin](docs/step4-activate.png)
+
+5. Go to **WooCommerce → Settings → Payments**  
+   ![WooCommerce Payments Settings](docs/step5-settings.png)
+
+6. Enable and configure **PawaPay**  
+   ![Enable PawaPay](docs/step6-enable.png)
+   ![Enable PawaPay](docs/step6-enable-2.png)
+
+7. Go to your **Checkout Page** on the site and verify that **PawaPay** is available as a payment method.  
+   ![Checkout Page](docs/step7-checkout.png)
 
 ---
 
@@ -103,6 +88,21 @@ The plugin automatically converts from **any store currency** into the supported
 - The plugin also supports **PawaPay webhooks**, ensuring that the order status in WooCommerce always matches the real payment status.  
 
 This means your customers **cannot bypass failed transactions**, as the order is updated directly from PawaPay.
+
+### Webhook Configuration
+
+To ensure your WooCommerce order statuses are updated securely and automatically, you need to configure a **Webhook URL** in your PawaPay dashboard.
+
+### Webhook URL
+
+    https://your-domaine.com/wp-json/pawapay/v1/deposit-callback
+
+### Important Notes
+
+- If the **webhook is not configured**, the payment status will only update when the customer clicks **"Return to Store"** after completing the payment.
+- With the webhook properly configured, WooCommerce will always reflect the **real payment status** (success, failure, pending).
+- Make sure your domain is publicly accessible and uses **HTTPS**.
+- Test first in **Sandbox Mode** before going live.
 
 ---
 
@@ -144,40 +144,9 @@ This means your customers **cannot bypass failed transactions**, as the order is
 
 ---
 
-## Changelog
-
-### Version 1.3.0
-
-- Added support for **all PawaPay settlement currencies (XOF/XAF)**
-- Added **ExchangeRate API integration** (with optional API key)
-- Improved currency conversion reliability
-- Added **webhook support** for secure payment status validation
-- Improved error handling
-
-### Version 1.2.2
-
-- Fixed WooCommerce Blocks compatibility
-- Improved error handling
-- Performance optimizations
-
-### Version 1.2.1
-
-- Added multi-country support
-- Operator selection with logos
-- Automatic currency conversion
-
-### Version 1.1.0
-
-- Initial release with basic PawaPay support
-
----
-
 ## Roadmap
 
-- [ ] Advanced transaction management dashboard  
-- [ ] Integrated reports & analytics  
-- [ ] Add more African countries  
-- [ ] Loyalty system integration  
+- [ ] Advanced transaction management dashboard
 
 ---
 
