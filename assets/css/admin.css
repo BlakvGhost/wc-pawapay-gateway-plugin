@@ -1,0 +1,117 @@
+.pawapay-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin: 20px 0;
+}
+
+.pawapay-stat-card {
+  background: #fff;
+  border: 1px solid #ccd0d4;
+  border-radius: 4px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.pawapay-stat-card h3 {
+  margin: 0 0 10px 0;
+  font-size: 2em;
+  color: #2271b1;
+}
+
+.pawapay-stat-card p {
+  margin: 0;
+  color: #646970;
+  font-weight: 500;
+}
+
+.order-status {
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-completed,
+.status-processing {
+  background: #d1e7dd;
+  color: #0f5132;
+}
+
+.status-pending,
+.status-on-hold {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-failed,
+.status-cancelled {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.refund-status {
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-completed {
+  background: #d1e7dd;
+  color: #0f5132;
+}
+
+.pawapay-refund-interface {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-top: 20px;
+}
+
+.pawapay-refund-form {
+  background: #fff;
+  padding: 20px;
+  border: 1px solid #ccd0d4;
+  border-radius: 4px;
+}
+
+.pawapay-refund-history {
+  background: #fff;
+  padding: 20px;
+  border: 1px solid #ccd0d4;
+  border-radius: 4px;
+}
+
+#pawapay_refund_result {
+  margin-top: 15px;
+  padding: 10px;
+  border-radius: 4px;
+}
+
+.pawapay-success {
+  background: #d1e7dd;
+  color: #0f5132;
+  border: 1px solid #badbcc;
+}
+
+.pawapay-error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.pawapay-refund-btn {
+  margin: 2px;
+}
+
+@media (max-width: 768px) {
+  .pawapay-refund-interface {
+    grid-template-columns: 1fr;
+  }
+
+  .pawapay-stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}

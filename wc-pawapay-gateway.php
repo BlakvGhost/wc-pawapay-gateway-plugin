@@ -14,12 +14,12 @@ WC requires at least: 5.5
 WC tested up to: 8.0
 */
 
-
 if (!defined('ABSPATH')) {
     exit;
 }
 
 define('WC_PAWAPAY_PLUGIN_FILE', __FILE__);
+define('WC_PAWAPAY_PLUGIN_DIR', plugin_dir_path(__FILE__));
 
 add_action('before_woocommerce_init', function () {
     if (class_exists(\Automattic\WooCommerce\Utilities\FeaturesUtil::class)) {
@@ -47,9 +47,9 @@ function wc_pawapay_init_gateway()
         return;
     }
 
-    require_once __DIR__ . '/includes/class-pawapay-api.php';
-    require_once __DIR__ . '/includes/class-wc-gateway-pawapay.php';
-    require_once __DIR__ . '/includes/class-wc-gateway-pawapay-refunds.php';
+    require_once WC_PAWAPAY_PLUGIN_DIR . 'includes/class-pawapay-api.php';
+    require_once WC_PAWAPAY_PLUGIN_DIR . 'includes/class-wc-gateway-pawapay.php';
+    require_once WC_PAWAPAY_PLUGIN_DIR . 'includes/class-wc-gateway-pawapay-refunds.php';
 
     add_filter('woocommerce_payment_gateways', function ($gateways) {
         $gateways[] = 'WC_Gateway_PawaPay';
@@ -128,12 +128,18 @@ function pawapay_handle_webhook(WP_REST_Request $request)
     $logger = wc_get_logger();
     $logger->info('Webhook PawaPay reçu: ' . wp_json_encode($body), ['source' => 'pawapay']);
 
-    if (!isset($body['paymentPageId']) || !isset($body['status'])) {
+    if (!isset($body['status'])) {
         return new WP_Error('missing_data', 'Données de webhook invalides', ['status' => 400]);
     }
 
-    $payment_page_id = sanitize_text_field($body['paymentPageId']);
-    $order_id = $body['merchantReference'] ?? 0;
+    $order_id = $body['depositId'] ?? 0;
+
+    $gateways = WC()->payment_gateways->payment_gateways();
+    $gateway = $gateways['pawapay'] ?? null;
+
+    if (!$gateway) {
+        return new WP_Error('gateway_not_found', 'Gateway PawaPay non trouvé', ['status' => 500]);
+    }
 
     $client = $gateway->client;
     $url    = $client->get_base_url() . '/deposits/' . $order_id;
@@ -147,6 +153,7 @@ function pawapay_handle_webhook(WP_REST_Request $request)
     $data   = json_decode(wp_remote_retrieve_body($resp), true);
     $status = $data['status'] ? $data['data']['status'] : null;
 
+    $order_id = $body['metadata']['order_id'] ?? 0;
     $order = wc_get_order($order_id);
 
     if (!$order) {
@@ -180,6 +187,54 @@ function pawapay_handle_webhook(WP_REST_Request $request)
     return new WP_REST_Response(['status' => 'success'], 200);
 }
 
+
+function pawapay_handle_refund_webhook(WP_REST_Request $request)
+{
+    $body = $request->get_json_params();
+    $logger = wc_get_logger();
+    $logger->info('Webhook PawaPay Refund reçu: ' . wp_json_encode($body), ['source' => 'pawapay']);
+
+    if (!isset($body['status'])) {
+        return new WP_Error('missing_data', 'Données de webhook invalides', ['status' => 400]);
+    }
+
+    $order_id = $body['refundId'] ?? 0;
+
+    $gateways = WC()->payment_gateways->payment_gateways();
+    $gateway = $gateways['pawapay'] ?? null;
+
+    if (!$gateway) {
+        return new WP_Error('gateway_not_found', 'Gateway PawaPay non trouvé', ['status' => 500]);
+    }
+
+    $client = $gateway->client;
+    $url    = $client->get_base_url() . '/refunds/' . $order_id;
+
+    $checkResponse = wp_remote_get($url, [
+        'headers' => $client->get_headers(),
+        'timeout' => 30,
+    ]);
+
+    if (is_wp_error($checkResponse) || wp_remote_retrieve_response_code($checkResponse) !== 200) {
+        return new WP_Error('refund_check_failed', __('Failed to verify refund status via PawaPay API.', 'wc-pawapay'));
+    }
+
+    $checkData = json_decode(wp_remote_retrieve_body($checkResponse), true);
+
+    if (isset($checkData['data']['status']) && $checkData['data']['status'] !== 'COMPLETED') {
+        return new WP_Error('refund_not_completed', __('Refund not completed yet via PawaPay API.', 'wc-pawapay'));
+    }
+
+    $order_id = $body['metadata']['order_id'] ?? 0;
+    $order = wc_get_order($order_id);
+
+    $order->add_order_note(sprintf(__('Refund of %s processed via PawaPay. Reason: %s', 'wc-pawapay'), wc_price($amount), $reason));
+    $order->update_meta_data('pawapay_last_refund_id', $refundId);
+    $order->save();
+
+    return new WP_REST_Response(['status' => 'success'], 200);
+}
+
 add_action('wp_enqueue_scripts', 'pawapay_add_styles');
 function pawapay_add_styles()
 {
@@ -197,6 +252,16 @@ function pawapay_register_webhook_route()
     ]);
 }
 add_action('rest_api_init', 'pawapay_register_webhook_route');
+
+function pawapay_register_refund_webhook_route()
+{
+    register_rest_route('pawapay/v1', '/refund-callback', [
+        'methods'             => WP_REST_Server::CREATABLE,
+        'callback'            => 'pawapay_handle_refund_webhook',
+        'permission_callback' => '__return_true',
+    ]);
+}
+add_action('rest_api_init', 'pawapay_register_refund_webhook_route');
 
 function pawapay_register_return_route()
 {
@@ -263,6 +328,8 @@ function pawapay_handle_return(WP_REST_Request $request)
 
 add_action('woocommerce_before_checkout_form', function () {
     if (!empty($_GET['pawapay_error'])) {
-        wc_print_notice(__('Votre paiement n’a pas pu être traité, merci de réessayer.', 'woocommerce'), 'error');
+        wc_print_notice(__('Votre paiement n\'a pas pu être traité, merci de réessayer.', 'woocommerce'), 'error');
     }
 });
+
+require_once WC_PAWAPAY_PLUGIN_DIR . 'includes/admin/class-pawapay-admin-menu.php';

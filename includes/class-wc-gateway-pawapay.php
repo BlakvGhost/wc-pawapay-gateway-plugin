@@ -381,14 +381,12 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
                 'body'    => wp_json_encode($body),
                 'timeout' => 30,
             ]);
-            $logger = wc_get_logger();
-            $logger->info('PawaPay Refund Request: ' . wp_json_encode($body), ['source' => 'pawapay']);
+
             if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
                 return new WP_Error('refund_failed', __('Refund failed via PawaPay API.', 'wc-pawapay'));
             }
 
             $data = json_decode(wp_remote_retrieve_body($response), true);
-            $logger->info('PawaPay Refund Response: ' . wp_json_encode($data), ['source' => 'pawapay']);
 
             if (isset($data['status']) && $data['status'] === 'ACCEPTED') {
 
@@ -397,12 +395,13 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
                     'headers' => $client->get_headers(),
                     'timeout' => 30,
                 ]);
+
                 if (is_wp_error($checkResponse) || wp_remote_retrieve_response_code($checkResponse) !== 200) {
                     return new WP_Error('refund_check_failed', __('Failed to verify refund status via PawaPay API.', 'wc-pawapay'));
                 }
 
                 $checkData = json_decode(wp_remote_retrieve_body($checkResponse), true);
-                $logger->info('PawaPay Refund Check Response: ' . wp_json_encode($checkData), ['source' => 'pawapay']);
+
                 if (isset($checkData['data']['status']) && $checkData['data']['status'] !== 'COMPLETED') {
                     return new WP_Error('refund_not_completed', __('Refund not completed yet via PawaPay API.', 'wc-pawapay'));
                 }
