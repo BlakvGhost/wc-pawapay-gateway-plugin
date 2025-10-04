@@ -225,12 +225,7 @@ function pawapay_handle_refund_webhook(WP_REST_Request $request)
         return new WP_Error('refund_not_completed', __('Refund not completed yet via PawaPay API.', 'wc-pawapay'));
     }
 
-    $order_id = $body['metadata']['order_id'] ?? 0;
-    $order = wc_get_order($order_id);
-
-    $order->add_order_note(sprintf(__('Refund of %s processed via PawaPay. Reason: %s', 'wc-pawapay'), wc_price($amount), $reason));
-    $order->update_meta_data('pawapay_last_refund_id', $refundId);
-    $order->save();
+    // implement logic
 
     return new WP_REST_Response(['status' => 'success'], 200);
 }
