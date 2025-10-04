@@ -1,66 +1,72 @@
 # WooCommerce PawaPay Gateway Plugin
 
 A WordPress payment gateway plugin that integrates **Mobile Money payments** via the **PawaPay API** with automatic currency conversion.  
-It supports multi-country, multi-operator payments and ensures secure transaction validation using webhooks and return URLs.
+It supports multi-country, multi-operator payments, secure transaction validation via webhooks and return URLs, and provides full support for both **WooCommerce Classic Checkout** and **Block Checkout**.
 
 ---
 
 ## Features
 
-- ✅ Full integration with WooCommerce
-- ✅ Mobile Money payments via **PawaPay Payment Page**
-- ✅ Automatic currency conversion (any supported currency → XOF / XAF depending on country)
-- ✅ Supports both **free** and **API key-based** exchange rate providers
-- ✅ Country and operator selection at checkout
-- ✅ Mobile operator logos at checkout
-- ✅ Multi-country support (West & Central Africa)
-- ✅ Sandbox and Production modes
-- ✅ Webhook support for secure payment status validation
+✅ Full integration with WooCommerce  
+✅ Mobile Money payments via the **PawaPay Payment Page**  
+✅ Automatic currency conversion (any supported currency → XOF / XAF depending on country)  
+✅ Supports both free and API-key-based exchange rate providers  
+✅ Country and operator selection at checkout  
+✅ Mobile operator logos displayed at checkout  
+✅ Multi-country support (West & Central Africa)  
+✅ Sandbox and Production modes  
+✅ Secure webhook support for real-time status validation  
+✅ Complete refund system:  
+
+- Refunds directly from WooCommerce order details  
+- Dedicated refund interface in the **PawaPay Dashboard**  
+- Refund history tracking  
+✅ Supports both **Block Checkout** and **Classic Checkout** interfaces  
+✅ Admin **PawaPay Dashboard** with transaction history and refund management  
 
 ---
 
 ## Supported Countries
 
-The list of supported countries is automatically retrieved from your **PawaPay account**.  
-This means that only the countries and operators that are **activated for your merchant account** will appear at checkout.  
+The list of supported countries and operators is automatically retrieved from your **PawaPay merchant account**.  
+Only countries and operators that are **enabled** for your account will appear at checkout.  
 
-You don’t need to manually configure them — the plugin dynamically loads them from PawaPay’s API.
+You don’t need to manually configure them — the plugin dynamically loads this data from PawaPay’s API.
 
 ---
 
 ## Currency Conversion
 
-The plugin automatically converts from **any store currency** into the supported settlement currencies for PawaPay
+The plugin automatically converts any store currency into one of the settlement currencies supported by PawaPay (XOF / XAF).
 
 ### How it works
 
-1. If you configure an **API key** for [ExchangeRate API](https://www.exchangerate-api.com/), the plugin will use the **paid endpoint** for reliable conversion.  
-2. If no key is provided, it falls back to the **free endpoint** (less stable, but works without registration).  
-3. Conversion rates are cached for **6 hours** to optimize API calls.  
+1. If you configure an **ExchangeRate API key**, the plugin uses the **premium endpoint** for accurate and reliable conversion.  
+2. If no key is provided, it falls back to the **free endpoint** (less reliable but works without registration).  
+3. Exchange rates are cached for **6 hours** to reduce API requests.
 
 ---
 
 ## Installation
 
 1. Download the plugin ZIP
+
    ![Download Plugin](docs/step1-download.png)
-
 2. Go to **WordPress Admin → Plugins → Add New**
+3. Click **Upload Plugin** and select the ZIP file  
+4. Activate the plugin
 
-3. Click **Upload Plugin** and select the ZIP file
-
-4. Activate the plugin  
    ![Activate Plugin](docs/step4-activate.png)
+5. Go to **WooCommerce → Settings → Payments**
 
-5. Go to **WooCommerce → Settings → Payments**  
    ![WooCommerce Payments Settings](docs/step5-settings.png)
+6. Enable and configure **PawaPay**
 
-6. Enable and configure **PawaPay**  
    ![Enable PawaPay](docs/step6-enable.png)
    ![Enable PawaPay](docs/step6-enable-2.png)
+7. Visit your **Checkout Page** (Block or Classic) and confirm that PawaPay appears as a payment method.
 
-7. Go to your **Checkout Page** on the site and verify that **PawaPay** is available as a payment method.  
-   ![Checkout Page](docs/step7-checkout.png)
+![Checkout Page](docs/step7-checkout.png)
 
 ---
 
@@ -68,41 +74,114 @@ The plugin automatically converts from **any store currency** into the supported
 
 ### Required Settings
 
-1. **API Token** – Your PawaPay API token (from your PawaPay dashboard)  
-2. **Environment** – Sandbox (testing) or Production (live transactions)  
-3. **Merchant Name** – The name shown on the customer’s statement (max 22 characters)  
-4. **ExchangeRate API Key (optional)** – Provide your key for reliable currency conversion. Leave empty to use the free fallback endpoint.  
+| Setting | Description |
+|----------|-------------|
+| **Title** | The payment method name displayed at checkout (e.g., *Mobile Money (PawaPay)*) |
+| **Description** | The message displayed under the payment method during checkout |
+| **API Token** | Your PawaPay API token (available in your PawaPay dashboard) |
+| **Environment** | Choose between **Sandbox** (test mode) and **Production** (live mode) |
+| **Webhook Identifier** | A unique value that identifies your store. This is used in the payment metadata to distinguish webhooks when multiple stores share the same PawaPay account. |
+| **Payment Page Language** | Select the language used on the PawaPay payment page (**English** or **French**) |
+| **ExchangeRate API Key (optional)** | Enter your ExchangeRate API key for reliable currency conversion. Leave empty to use the free fallback endpoint. |
 
-### Example Configuration in WooCommerce Settings
+### Example Configuration
 
-- API Token: `sk_test_XXXXXX`  
-- Environment: `Sandbox`  
-- Merchant Name: `MyShop`  
-- ExchangeRate API Key: `your_api_key_here` (optional)  
+- **Title**: Mobile Money (PawaPay)  
+- **Description**: You will be redirected to a secure page to complete your payment.  
+- **API Token**: sk_test_XXXXXX  
+- **Environment**: Sandbox  
+- **Webhook Identifier**: myshop-unique-id  
+- **Payment Page Language**: ENGLISH  
+- **ExchangeRate API Key**: your_api_key_here (optional)
 
 ---
 
-## Return URL & Webhooks
+## Return URLs & Webhooks
 
-- On payment **success or failure**, PawaPay redirects the customer to your store using the `returnUrl`.  
-- The plugin also supports **PawaPay webhooks**, ensuring that the order status in WooCommerce always matches the real payment status.  
-
-This means your customers **cannot bypass failed transactions**, as the order is updated directly from PawaPay.
+On payment success or failure, PawaPay redirects the customer back to your store using the configured `returnUrl`.  
+The plugin also supports **PawaPay webhooks**, ensuring that WooCommerce order statuses always match the actual payment state.
 
 ### Webhook Configuration
 
-To ensure your WooCommerce order statuses are updated securely and automatically, you need to configure a **Webhook URL** in your PawaPay dashboard.
+In your PawaPay dashboard, configure the following URLs:
 
-### Webhook URL
+**Payment Webhook URL:**
+<https://your-domain.com/wp-json/pawapay/v1/deposit-callback>
 
-    https://your-domaine.com/wp-json/pawapay/v1/deposit-callback
+**Refund Webhook URL:**
+<https://your-domain.com/wp-json/pawapay/v1/refund-callback>
 
-### Important Notes
+### Notes
 
-- If the **webhook is not configured**, the payment status will only update when the customer clicks **"Return to Store"** after completing the payment.
-- With the webhook properly configured, WooCommerce will always reflect the **real payment status** (success, failure, pending).
-- Make sure your domain is publicly accessible and uses **HTTPS**.
-- Test first in **Sandbox Mode** before going live.
+- If the webhook is not configured, the payment status will only update when the customer clicks “Return to Store.”  
+- When configured correctly, WooCommerce will automatically reflect real payment states (**Success**, **Failed**, **Pending**).  
+- Ensure your domain is **HTTPS** and publicly accessible.  
+- Always test in **Sandbox Mode** before going live.  
+
+---
+
+## Refund System
+
+You can process refunds using two different methods:
+
+### 1. From WooCommerce Order Details
+
+- Go to **WooCommerce → Orders**  
+- Open an order paid with PawaPay  
+- Click **Refund** inside the order details  
+- The plugin automatically sends the refund request to PawaPay via API  
+
+### 2. From the PawaPay Dashboard
+
+- Go to **PawaPay → Refunds** in the WordPress admin menu  
+- Use the dedicated refund interface to process refunds  
+- Select the order, specify the amount and reason, and confirm  
+- A complete refund history is stored for your reference  
+
+### Refund Features
+
+✅ Full and partial refunds  
+✅ Automatic synchronization with PawaPay API  
+✅ Automatic WooCommerce order status updates  
+✅ Detailed refund history and logs  
+✅ Automatic order notes with refund details  
+
+---
+
+## Admin Dashboard
+
+The plugin adds a **PawaPay** section to the WordPress admin sidebar.  
+
+### Menu Sections
+
+- **Dashboard** – Overview of recent transactions and order statistics  
+- **Transactions** – Complete list of all PawaPay payments  
+- **Refunds** – Dedicated refund interface and refund history  
+
+### Available Statistics
+
+- Total orders  
+- Paid orders  
+- Pending orders  
+- Total revenue  
+
+---
+
+## WooCommerce Blocks Support
+
+### Full Compatibility
+
+The plugin fully supports the **new WooCommerce Block Checkout** experience:
+
+- Seamless integration into the payment block  
+- Responsive and user-friendly interface  
+- Real-time validation  
+- Works with all modern block-based themes  
+- Dynamic currency conversion support  
+
+### Classic Checkout
+
+The plugin also works perfectly with the **Classic Checkout** interface used in traditional WooCommerce setups.
 
 ---
 
@@ -110,43 +189,43 @@ To ensure your WooCommerce order statuses are updated securely and automatically
 
 ### Actions
 
-- `pawapay_before_payment_processing` – Before payment is created
-- `pawapay_after_payment_processing` – After payment is created
-- `pawapay_payment_success` – When a payment succeeds
-- `pawapay_payment_failed` – When a payment fails
+- `pawapay_before_payment_processing` – Before creating a payment  
+- `pawapay_after_payment_processing` – After creating a payment  
+- `pawapay_payment_success` – When a payment succeeds  
+- `pawapay_payment_failed` – When a payment fails  
 
 ### Filters
 
-- `pawapay_supported_countries` – Modify supported countries
-- `pawapay_supported_currencies` – Modify supported currencies
-- `pawapay_provider_list` – Modify mobile operators
-- `pawapay_payment_description` – Customize payment description
+- `pawapay_supported_countries` – Modify supported countries  
+- `pawapay_supported_currencies` – Modify supported currencies  
+- `pawapay_provider_list` – Modify mobile operator list  
+- `pawapay_payment_description` – Customize payment description  
 
 ---
 
 ## Troubleshooting
 
-### Gateway not showing at checkout
+### Gateway not visible at checkout
 
-- Verify WooCommerce is active  
-- Ensure your store currency is supported  
-- Confirm the API token is configured  
+- Ensure WooCommerce is active  
+- Check that your store currency is supported  
+- Verify that your PawaPay API token is valid  
 
 ### Currency conversion errors
 
-- If using the free endpoint, it may be unavailable at times  
-- Add an **ExchangeRate API key** for reliable conversion  
+- The free endpoint may be unreliable — use an API key for better stability  
 
-### Issues with WooCommerce Blocks
+### WooCommerce Block Checkout issues
 
-- Update to the latest WooCommerce version  
-- Clear your site cache  
+- Update WooCommerce and WooCommerce Blocks to the latest version  
+- Clear your website cache  
 
 ---
 
 ## Roadmap
 
-- [ ] Advanced transaction management dashboard
+- [ ] Advanced analytics and transaction dashboard  
+- [ ] Support Payout
 
 ---
 
@@ -160,15 +239,17 @@ To ensure your WooCommerce order statuses are updated securely and automatically
 
 ## License
 
-This plugin is licensed under the GNU General Public License v3.0 (GPLv3) or later.  
-You can redistribute it and/or modify it under the terms of the GPL as published by the Free Software Foundation.
+This plugin is licensed under the **GNU General Public License v3.0 (GPLv3)** or later.  
+You can redistribute and/or modify it under the terms of the GPL as published by the Free Software Foundation.
 
 ---
 
 ## Contributors
 
-- Developed & maintained by [Kabirou ALASSANE](https://kabiroualassane.link)  
+- Developed & maintained by [Kabirou ALASSANE](https://kabiroualassane.link)
 
 ---
 
-**Note**: This plugin requires a valid **PawaPay API key** to process payments. Sign up at [PawaPay](https://pawapay.io) to get your credentials.  
+**Note:**  
+This plugin requires a valid **PawaPay API key** to process payments.  
+Sign up at [PawaPay](https://pawapay.io) to get your credentials.
