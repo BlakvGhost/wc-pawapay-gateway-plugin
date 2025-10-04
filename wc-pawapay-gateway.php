@@ -128,8 +128,6 @@ function pawapay_handle_currency_conversion(WP_REST_Request $request)
 function pawapay_handle_webhook(WP_REST_Request $request)
 {
     $body = $request->get_json_params();
-    $logger = wc_get_logger();
-    $logger->info('Webhook PawaPay reçu: ' . wp_json_encode($body), ['source' => 'pawapay']);
 
     if (!isset($body['status'])) {
         return new WP_Error('missing_data', 'Données de webhook invalides', ['status' => 400]);
@@ -160,7 +158,6 @@ function pawapay_handle_webhook(WP_REST_Request $request)
     $order = wc_get_order($order_id);
 
     if (!$order) {
-        $logger->error('Webhook PawaPay: Commande non trouvée pour ID: ' . $order_id, ['source' => 'pawapay']);
         return new WP_Error('order_not_found', 'Commande non trouvée', ['status' => 404]);
     }
 
@@ -194,8 +191,6 @@ function pawapay_handle_webhook(WP_REST_Request $request)
 function pawapay_handle_refund_webhook(WP_REST_Request $request)
 {
     $body = $request->get_json_params();
-    $logger = wc_get_logger();
-    $logger->info('Webhook PawaPay Refund reçu: ' . wp_json_encode($body), ['source' => 'pawapay']);
 
     if (!isset($body['status'])) {
         return new WP_Error('missing_data', 'Données de webhook invalides', ['status' => 400]);
@@ -227,8 +222,6 @@ function pawapay_handle_refund_webhook(WP_REST_Request $request)
     if (isset($checkData['data']['status']) && $checkData['data']['status'] !== 'COMPLETED') {
         return new WP_Error('refund_not_completed', __('Refund not completed yet via PawaPay API.', 'wc-pawapay'));
     }
-
-    // implement logic
 
     return new WP_REST_Response(['status' => 'success'], 200);
 }
