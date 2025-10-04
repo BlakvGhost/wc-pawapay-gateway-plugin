@@ -29,5 +29,66 @@
 }
 
 .payment_method_pawapay img {
-	height: 25px;
+  height: 25px;
+}
+
+/* Styles pour l'intégration des blocs */
+.wc-pawapay-blocks-content {
+  margin-top: 1em;
+}
+
+.wc-pawapay-field {
+  margin-bottom: 1em;
+}
+
+.wc-pawapay-field label {
+  display: block;
+  margin-bottom: 0.5em;
+  font-weight: 600;
+}
+
+.wc-pawapay-country-select,
+.wc-pawapay-currency-select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.wc-pawapay-currency-select:disabled {
+  background-color: #f8f9fa;
+  opacity: 0.7;
+}
+
+.wc-pawapay-country-select.has-error,
+.wc-pawapay-currency-select.has-error {
+  border-color: #e2401c;
+}
+
+.wc-pawapay-field-error {
+  color: #e2401c;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* Compatibilité avec le thème des blocs */
+.woocommerce-checkout .wc-pawapay-blocks-content {
+  padding: 1em 0;
+}
+
+.wc-block-components-radio-control__option .wc-pawapay-blocks-content {
+  padding: 0;
+}
+
+/* Styles spécifiques aux blocs */
+.wc-block-checkout .wc-pawapay-blocks-content {
+  border: 1px solid #ddd;
+  padding: 1em;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.wc-block-checkout .wc-pawapay-field label {
+  font-weight: normal;
 }

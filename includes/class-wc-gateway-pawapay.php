@@ -48,11 +48,21 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
 
     public function supports($feature)
     {
+        $supports = parent::supports($feature);
+
+        if ($feature === 'cart_checkout_blocks') {
+            return true;
+        }
+
+        if ($feature === 'woocommerce_blocks') {
+            return true;
+        }
+
         if ($feature === 'partial-refunds') {
             return false;
         }
 
-        return parent::supports($feature);
+        return $supports;
     }
 
 
@@ -120,8 +130,9 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
         $url = $this->client->get_base_url() . '/active-conf';
         $args = [
             'headers' => $this->client->get_headers(),
-            'timeout' => 30,
+            'timeout' => 15,
         ];
+
         $response = wp_remote_get($url, $args);
 
         if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
@@ -129,6 +140,7 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
         }
 
         $data = json_decode(wp_remote_retrieve_body($response), true);
+
         return $data;
     }
 
@@ -235,10 +247,16 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
     {
         $order = wc_get_order($order_id);
 
-        $country_code = isset($_POST['wc-pawapay-new-payment-method']['pawapay_country']) ? sanitize_text_field($_POST['wc-pawapay-new-payment-method']['pawapay_country']) : null;
-        $currency_code = isset($_POST['wc-pawapay-new-payment-method']['pawapay_currency']) ? sanitize_text_field($_POST['wc-pawapay-new-payment-method']['pawapay_currency']) : null;
+        $country_code = null;
+        $currency_code = null;
 
-        if (empty($country_code) || empty($currency_code)) {
+        if (isset($_POST['pawapay_country']) && isset($_POST['pawapay_currency'])) {
+            $country_code = sanitize_text_field($_POST['pawapay_country']);
+            $currency_code = sanitize_text_field($_POST['pawapay_currency']);
+        } elseif (isset($_POST['wc-pawapay-new-payment-method'])) {
+            $country_code = isset($_POST['wc-pawapay-new-payment-method']['pawapay_country']) ? sanitize_text_field($_POST['wc-pawapay-new-payment-method']['pawapay_country']) : null;
+            $currency_code = isset($_POST['wc-pawapay-new-payment-method']['pawapay_currency']) ? sanitize_text_field($_POST['wc-pawapay-new-payment-method']['pawapay_currency']) : null;
+        } else {
             $country_code = $order->get_meta('pawapay_country');
             $currency_code = $order->get_meta('pawapay_currency');
         }
@@ -250,6 +268,7 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
 
         $order_total = $order->get_total();
         $converted_amount = $this->convert_currency(get_woocommerce_currency(), $currency_code, $order_total);
+
         if (is_wp_error($converted_amount)) {
             wc_add_notice(__('Erreur de conversion de devise.', 'wc-pawapay'), 'error');
             return ['result' => 'failure'];
@@ -421,7 +440,7 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
 
     public function convert_currency($from, $to, $amount)
     {
-        $cache_key   = '_pawapay_exchange_rate_' . $from . '_' . $to;
+        $cache_key   = 'pawapay_exchange_rate_' . $from . '_' . $to;
         $cached_rate = get_transient($cache_key);
 
         if ($cached_rate !== false) {
@@ -430,10 +449,8 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
             $api_key  = isset($this->exchange_api_key) ? trim($this->exchange_api_key) : '';
 
             if (!empty($api_key)) {
-                // Endpoint payant (clé API définie)
                 $url = "https://v6.exchangerate-api.com/v6/{$api_key}/latest/{$from}";
             } else {
-                // Endpoint gratuit (fallback)
                 $url = "https://api.exchangerate-api.com/v4/latest/{$from}";
             }
 
@@ -458,7 +475,7 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
     }
 
 
-    public function ajax_convert_currency()
+    public function ajax_convert_currencyd()
     {
         if (!check_ajax_referer('pawapay_nonce', 'nonce', false)) {
             wp_send_json_error(__('Nonce de sécurité invalide.', 'wc-pawapay'));
@@ -475,6 +492,46 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
             wp_send_json_error($converted->get_error_message());
         } else {
             wp_send_json_success($converted);
+        }
+
+        wp_die();
+    }
+
+    public function ajax_convert_currency()
+    {
+        if (!check_ajax_referer('pawapay_nonce', 'nonce', false)) {
+            wp_send_json_error(__('Nonce de sécurité invalide.', 'wc-pawapay'));
+            wp_die();
+        }
+
+        if (empty($_POST['from']) || empty($_POST['to']) || empty($_POST['amount'])) {
+            wp_send_json_error(__('Paramètres manquants.', 'wc-pawapay'));
+            wp_die();
+        }
+
+        $from = sanitize_text_field($_POST['from']);
+        $to = sanitize_text_field($_POST['to']);
+        $amount = floatval($_POST['amount']);
+
+        $transient_key = 'pawapay_conversion_' . md5($from . $to . $amount);
+        $cached_result = get_transient($transient_key);
+
+        if ($cached_result !== false) {
+            wp_send_json_success($cached_result);
+            wp_die();
+        }
+
+        try {
+            $converted = $this->convert_currency($from, $to, $amount);
+
+            if (is_wp_error($converted)) {
+                wp_send_json_error($converted->get_error_message());
+            } else {
+                set_transient($transient_key, $converted, 5 * MINUTE_IN_SECONDS);
+                wp_send_json_success($converted);
+            }
+        } catch (Exception $e) {
+            wp_send_json_error(__('Erreur lors de la conversion.', 'wc-pawapay'));
         }
 
         wp_die();
