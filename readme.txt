@@ -16,9 +16,5 @@ Accept Mobile Money payments via the PawaPay Payment Page in WooCommerce. Suppor
 2. Activate the plugin through the 'Plugins' menu in WordPress.
 3. Go to WooCommerce > Settings > Payments and configure PawaPay.
 
-== Changelog ==
-= 1.0.0 =
-* Initial release.
-
 == License ==
 This plugin is licensed under the GNU General Public License v3.0 (GPLv3) or later. You can redistribute it and/or modify it under the terms of the GPL as published by the Free Software Foundation.
