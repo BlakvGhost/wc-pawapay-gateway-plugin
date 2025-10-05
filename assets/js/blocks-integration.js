@@ -165,7 +165,7 @@ const PawaPayContent = ({ data, eventRegistration, emitResponse }) => {
                 setErrors(newErrors);
                 return {
                     type: emitResponse?.responseTypes?.ERROR,
-                    message: pawapayBlocksData.form_error ?? __('Veuillez corriger les erreurs dans le formulaire PawaPay.', 'wc-pawapay'),
+                    message: pawapayBlocksData.i18n.form_error ?? __('Veuillez corriger les erreurs dans le formulaire PawaPay.', 'wc-pawapay'),
                     messageContext: emitResponse?.noticeContexts?.PAYMENTS,
                 };
             }
@@ -191,7 +191,7 @@ const PawaPayContent = ({ data, eventRegistration, emitResponse }) => {
 
         React.createElement('div', { className: 'wc-pawapay-field' },
             React.createElement('label', { htmlFor: 'pawapay_country_blocks' },
-                pawapayBlocksData.country_label ?? __('Pays', 'wc-pawapay'),
+                pawapayBlocksData.i18n.country_label ?? __('Pays', 'wc-pawapay'),
                 React.createElement('span', { className: 'required' }, ' *')
             ),
             React.createElement('select', {
@@ -223,7 +223,7 @@ const PawaPayContent = ({ data, eventRegistration, emitResponse }) => {
 
         React.createElement('div', { className: 'wc-pawapay-field', style: { marginTop: '1em' } },
             React.createElement('label', { htmlFor: 'pawapay_currency_blocks' },
-                pawapayBlocksData.currency_label ?? __('Devise', 'wc-pawapay'),
+                pawapayBlocksData.i18n.currency_label ?? __('Devise', 'wc-pawapay'),
                 React.createElement('span', { className: 'required' }, ' *')
             ),
             React.createElement('select', {
@@ -279,7 +279,7 @@ const PawaPayContent = ({ data, eventRegistration, emitResponse }) => {
                 textAlign: 'center',
                 color: '#666'
             }
-        }, pawapayBlocksData.conversion_in_progress ?? __('Conversion en cours...', 'wc-pawapay')),
+        }, pawapayBlocksData.i18n.conversion_in_progress ?? __('Conversion en cours...', 'wc-pawapay')),
 
         conversionAttempts >= 3 &&
         React.createElement('div', {
@@ -289,7 +289,7 @@ const PawaPayContent = ({ data, eventRegistration, emitResponse }) => {
                 color: '#e2401c',
                 fontSize: '12px'
             }
-        }, pawapayBlocksData.conversion_not_working ?? __('Service de conversion temporairement indisponible', 'wc-pawapay'))
+        }, pawapayBlocksData.i18n.conversion_not_working ?? __('Service de conversion temporairement indisponible', 'wc-pawapay'))
     );
 };
 
@@ -305,7 +305,7 @@ const PawaPayPaymentMethod = {
     supports: {
         features: pawapayBlocksData.supports || ['products'],
     },
-    placeOrderButtonLabel: pawapayBlocksData.pay_button_label ?? __('Payer avec PawaPay', 'wc-pawapay'),
+    placeOrderButtonLabel: pawapayBlocksData.i18n.pay_button_label ?? __('Payer avec PawaPay', 'wc-pawapay'),
 };
 
 if (typeof registerPaymentMethod === 'function') {
