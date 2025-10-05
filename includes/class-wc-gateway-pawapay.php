@@ -131,7 +131,6 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
         $args = [
             'headers' => $this->client->get_headers(),
             'timeout' => 15,
-            'sslverify' => false,
         ];
 
         $response = wp_remote_get($url, $args);
