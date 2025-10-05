@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-10-04T22:18:46+00:00\n"
+"POT-Creation-Date: 2025-10-05T00:05:18+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: wc-pawapay\n"
@@ -17,6 +17,11 @@ msgstr ""
 #. Plugin Name of the plugin
 #: wc-pawapay-gateway.php
 msgid "WooCommerce PawaPay Gateway"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: wc-pawapay-gateway.php
+msgid "https://github.com/BlakvGhost/wc-pawapay-gateway-plugin#readme"
 msgstr ""
 
 #. Description of the plugin
@@ -222,13 +227,13 @@ msgid "Vous serez redirigé vers une page sécurisée pour finaliser votre paiem
 msgstr ""
 
 #: includes/class-wc-gateway-pawapay-blocks.php:67
-#: includes/class-wc-gateway-pawapay.php:209
+#: includes/class-wc-gateway-pawapay.php:210
 msgid "Sélectionnez un pays"
 msgstr ""
 
 #: includes/class-wc-gateway-pawapay-blocks.php:68
-#: includes/class-wc-gateway-pawapay.php:178
-#: includes/class-wc-gateway-pawapay.php:218
+#: includes/class-wc-gateway-pawapay.php:179
+#: includes/class-wc-gateway-pawapay.php:219
 msgid "Sélectionnez une devise"
 msgstr ""
 
@@ -243,6 +248,38 @@ msgstr ""
 
 #: includes/class-wc-gateway-pawapay-blocks.php:71
 msgid "Veuillez sélectionner une devise"
+msgstr ""
+
+#: includes/class-wc-gateway-pawapay-blocks.php:72
+#: assets/js/blocks-integration.js:168
+msgid "Veuillez corriger les erreurs dans le formulaire PawaPay."
+msgstr ""
+
+#: includes/class-wc-gateway-pawapay-blocks.php:73
+#: assets/js/blocks-integration.js:282
+msgid "Conversion en cours..."
+msgstr ""
+
+#: includes/class-wc-gateway-pawapay-blocks.php:74
+#: assets/js/blocks-integration.js:292
+msgid "Service de conversion temporairement indisponible"
+msgstr ""
+
+#: includes/class-wc-gateway-pawapay-blocks.php:75
+#: assets/js/blocks-integration.js:308
+msgid "Payer avec PawaPay"
+msgstr ""
+
+#: includes/class-wc-gateway-pawapay-blocks.php:76
+#: includes/class-wc-gateway-pawapay.php:208
+#: assets/js/blocks-integration.js:194
+msgid "Pays"
+msgstr ""
+
+#: includes/class-wc-gateway-pawapay-blocks.php:77
+#: includes/class-wc-gateway-pawapay.php:217
+#: assets/js/blocks-integration.js:226
+msgid "Devise"
 msgstr ""
 
 #: includes/class-wc-gateway-pawapay-refunds.php:33
@@ -325,123 +362,97 @@ msgstr ""
 msgid "Entrez votre clé API ExchangeRate. Laissez vide pour utiliser la version gratuite (non garantie en production)."
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:191
+#: includes/class-wc-gateway-pawapay.php:192
 msgid "Erreur: Impossible de charger les pays supportés."
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:207
-#: assets/js/blocks-integration.js:194
-msgid "Pays"
-msgstr ""
-
-#: includes/class-wc-gateway-pawapay.php:216
-#: assets/js/blocks-integration.js:226
-msgid "Devise"
-msgstr ""
-
-#: includes/class-wc-gateway-pawapay.php:222
+#: includes/class-wc-gateway-pawapay.php:223
 msgid "Le montant total de votre commande de "
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:224
+#: includes/class-wc-gateway-pawapay.php:225
 msgid " sera converti et payé en "
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:265
+#: includes/class-wc-gateway-pawapay.php:266
 msgid "Veuillez sélectionner un pays et une devise."
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:273
-#: includes/class-wc-gateway-pawapay.php:460
+#: includes/class-wc-gateway-pawapay.php:274
+#: includes/class-wc-gateway-pawapay.php:461
 msgid "Erreur de conversion de devise."
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:285
+#: includes/class-wc-gateway-pawapay.php:286
 #, php-format
 msgid "Paiement pour %s"
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:288
+#: includes/class-wc-gateway-pawapay.php:289
 #, php-format
 msgid "Paiement pour %s et %d autres articles"
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:326
+#: includes/class-wc-gateway-pawapay.php:327
 msgid "Erreur de communication avec PawaPay: "
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:335
+#: includes/class-wc-gateway-pawapay.php:336
 msgid "Le paiement a été rejeté par PawaPay."
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:337
+#: includes/class-wc-gateway-pawapay.php:338
 msgid "Raison:"
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:344
+#: includes/class-wc-gateway-pawapay.php:345
 msgid "En attente de paiement sur la page PawaPay."
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:366
+#: includes/class-wc-gateway-pawapay.php:367
 msgid "Order not found."
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:374
+#: includes/class-wc-gateway-pawapay.php:375
 msgid "No transaction ID or metadata found for this order."
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:405
+#: includes/class-wc-gateway-pawapay.php:406
 msgid "Refund failed via PawaPay API."
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:419
-#: wc-pawapay-gateway.php:220
+#: includes/class-wc-gateway-pawapay.php:420
+#: wc-pawapay-gateway.php:221
 msgid "Failed to verify refund status via PawaPay API."
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:425
-#: wc-pawapay-gateway.php:226
+#: includes/class-wc-gateway-pawapay.php:426
+#: wc-pawapay-gateway.php:227
 msgid "Refund not completed yet via PawaPay API."
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:428
+#: includes/class-wc-gateway-pawapay.php:429
 #, php-format
 msgid "Refund of %s processed via PawaPay. Reason: %s"
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:433
+#: includes/class-wc-gateway-pawapay.php:434
 msgid "Refund failed."
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:466
+#: includes/class-wc-gateway-pawapay.php:467
 msgid "Devise cible non disponible."
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:481
-#: includes/class-wc-gateway-pawapay.php:503
+#: includes/class-wc-gateway-pawapay.php:482
+#: includes/class-wc-gateway-pawapay.php:504
 msgid "Nonce de sécurité invalide."
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:508
+#: includes/class-wc-gateway-pawapay.php:509
 msgid "Paramètres manquants."
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:534
+#: includes/class-wc-gateway-pawapay.php:535
 msgid "Erreur lors de la conversion."
-msgstr ""
-
-#: assets/js/blocks-integration.js:168
-msgid "Veuillez corriger les erreurs dans le formulaire PawaPay."
-msgstr ""
-
-#: assets/js/blocks-integration.js:282
-msgid "Conversion en cours..."
-msgstr ""
-
-#: assets/js/blocks-integration.js:292
-msgid "Service de conversion temporairement indisponible"
-msgstr ""
-
-#: assets/js/blocks-integration.js:308
-msgid "Payer avec PawaPay"
 msgstr ""

@@ -69,6 +69,12 @@ class WC_Gateway_PawaPay_Blocks extends Automattic\WooCommerce\Blocks\Payments\I
                 'converted_amount' => __('Le montant total de votre commande de %s sera converti et payé en %s', 'wc-pawapay'),
                 'country_required' => __('Veuillez sélectionner un pays', 'wc-pawapay'),
                 'currency_required' => __('Veuillez sélectionner une devise', 'wc-pawapay'),
+                'form_error' => __('Veuillez corriger les erreurs dans le formulaire PawaPay.', 'wc-pawapay'),
+                'conversion_in_progress' => __('Conversion en cours...', 'wc-pawapay'),
+                'conversion_not_working' => __('Service de conversion temporairement indisponible', 'wc-pawapay'),
+                'pay_button_label' => __('Payer avec PawaPay', 'wc-pawapay'),
+                'country_label' => __('Pays', 'wc-pawapay'),
+                'currency_label' => __('Devise', 'wc-pawapay'),
             ]
         ];
     }
