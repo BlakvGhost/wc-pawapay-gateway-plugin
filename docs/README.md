@@ -51,22 +51,25 @@ The plugin automatically converts any store currency into one of the settlement 
 
 1. Download the plugin ZIP
 
-   ![Download Plugin](docs/step1-download.png)
+   ![Download Plugin](step1-download.png)
 2. Go to **WordPress Admin → Plugins → Add New**
-3. Click **Upload Plugin** and select the ZIP file  
+3. Click **Upload Plugin** and select the ZIP file
+
+   ![Add New Plugin](step2-install-plugin.png)
 4. Activate the plugin
 
-   ![Activate Plugin](docs/step4-activate.png)
+   ![Activate Plugin](activate-plugin.png)
+   ![Activate Plugin](plugin-installed.png)
 5. Go to **WooCommerce → Settings → Payments**
 
-   ![WooCommerce Payments Settings](docs/step5-settings.png)
+   ![WooCommerce Payments Settings](woocommerce-payment-config-page.png)
 6. Enable and configure **PawaPay**
 
-   ![Enable PawaPay](docs/step6-enable.png)
-   ![Enable PawaPay](docs/step6-enable-2.png)
+   ![Enable PawaPay](woocommerce-payment-config-page-1.png)
+   ![Enable PawaPay](woocommerce-payment-config-page-2.png)
 7. Visit your **Checkout Page** (Block or Classic) and confirm that PawaPay appears as a payment method.
 
-![Checkout Page](docs/step7-checkout.png)
+![Checkout Page](step7-checkout.png)
 
 ---
 
@@ -129,7 +132,9 @@ You can process refunds using two different methods:
 - Go to **WooCommerce → Orders**  
 - Open an order paid with PawaPay  
 - Click **Refund** inside the order details  
-- The plugin automatically sends the refund request to PawaPay via API  
+- The plugin automatically sends the refund request to PawaPay via API
+  
+![Refund From WooCommerce Order Details](refund-on-order-detail.png)
 
 ### 2. From the PawaPay Dashboard
 
@@ -137,6 +142,8 @@ You can process refunds using two different methods:
 - Use the dedicated refund interface to process refunds  
 - Select the order, specify the amount and reason, and confirm  
 - A complete refund history is stored for your reference  
+  
+![Refund From the PawaPay Dashboard](refund-on-dashboard.png)
 
 ### Refund Features
 
@@ -150,7 +157,9 @@ You can process refunds using two different methods:
 
 ## Admin Dashboard
 
-The plugin adds a **PawaPay** section to the WordPress admin sidebar.  
+The plugin adds a **PawaPay** section to the WordPress admin sidebar.
+
+![Admin Dashboard](dasboard-pawapay.png)
 
 ### Menu Sections
 
@@ -179,9 +188,13 @@ The plugin fully supports the **new WooCommerce Block Checkout** experience:
 - Works with all modern block-based themes  
 - Dynamic currency conversion support  
 
+![WooCommerce Block Checkout Page](block.png)
+
 ### Classic Checkout
 
 The plugin also works perfectly with the **Classic Checkout** interface used in traditional WooCommerce setups.
+
+![WooCommerce Classic Checkout Page](step7-checkout.png)
 
 ---
 
