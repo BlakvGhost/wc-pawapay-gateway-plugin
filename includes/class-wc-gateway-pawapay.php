@@ -421,9 +421,9 @@ class WC_Gateway_PawaPay extends WC_Payment_Gateway
 
                 $checkData = json_decode(wp_remote_retrieve_body($checkResponse), true);
 
-                if (isset($checkData['data']['status']) && $checkData['data']['status'] !== 'COMPLETED') {
-                    return new WP_Error('refund_not_completed', __('Refund not completed yet via PawaPay API.', 'wc-pawapay'));
-                }
+                // if (isset($checkData['data']['status']) && $checkData['data']['status'] !== 'COMPLETED') {
+                //     return new WP_Error('refund_not_completed', __('Refund not completed yet via PawaPay API.', 'wc-pawapay'));
+                // }
 
                 $order->add_order_note(sprintf(__('Refund of %s processed via PawaPay. Reason: %s', 'wc-pawapay'), wc_price($amount), $reason));
                 $order->update_meta_data('pawapay_last_refund_id', $refundId);
