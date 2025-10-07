@@ -420,7 +420,7 @@ class PawaPay_Admin_Menu
                     )
                 );
 
-                do_action('pawapay_refund_processed', $order_id, $order, $amount);
+                do_action('pawapay_refund_processed', $order_id, $order, $amount, $reason);
                 wp_send_json_success(__('Remboursement effectué avec succès. Statut de la commande mis à jour.', 'wc-pawapay'));
             } else {
                 wp_delete_post($refund->get_id(), true);
