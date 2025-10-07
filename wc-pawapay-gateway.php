@@ -57,6 +57,7 @@ function wc_pawapay_init_gateway()
     require_once WC_PAWAPAY_PLUGIN_DIR . 'includes/class-wc-gateway-pawapay.php';
     require_once WC_PAWAPAY_PLUGIN_DIR . 'includes/class-wc-gateway-pawapay-refunds.php';
     require_once WC_PAWAPAY_PLUGIN_DIR . 'includes/class-wc-gateway-pawapay-blocks-support.php';
+    require_once WC_PAWAPAY_PLUGIN_DIR . 'includes/class-pawapay-emails.php';
 
     add_filter('woocommerce_payment_gateways', function ($gateways) {
         $gateways[] = 'WC_Gateway_PawaPay';
@@ -177,14 +178,17 @@ function pawapay_handle_webhook(WP_REST_Request $request)
                 $order->add_order_note(__('Paiement PawaPay réussi. ID de transaction: ', 'woocommerce') . $transaction_id);
                 $order->payment_complete($transaction_id);
                 $order->update_status('completed', __('Paiement confirmé par PawaPay.', 'woocommerce'));
+                do_action('pawapay_payment_success', $order_id, $order);
             }
             break;
         case 'FAILED':
             $reason = isset($body['failureReason']) ? sanitize_text_field($body['failureReason']) : 'Inconnue';
             $order->update_status('failed', sprintf(__('Le paiement PawaPay a échoué. Raison: %s', 'woocommerce'), $reason));
+            do_action('pawapay_payment_failed', $order_id, $order);
             break;
         case 'CANCELLED':
             $order->update_status('cancelled', __('Le paiement PawaPay a été annulé.', 'woocommerce'));
+            do_action('pawapay_payment_failed', $order_id, $order);
             break;
     }
 
@@ -226,6 +230,8 @@ function pawapay_handle_refund_webhook(WP_REST_Request $request)
     if (isset($checkData['data']['status']) && $checkData['data']['status'] !== 'COMPLETED') {
         return new WP_Error('refund_not_completed', __('Refund not completed yet via PawaPay API.', 'wc-pawapay'));
     }
+
+    do_action('pawapay_refund_processed', $order_id, $order, $amount);
 
     return new WP_REST_Response(['status' => 'success'], 200);
 }
@@ -306,6 +312,7 @@ function pawapay_handle_return(WP_REST_Request $request)
             if (!$order->is_paid()) {
                 $order->payment_complete($deposit_id);
                 $order->update_status('completed', __('Paiement confirmé par PawaPay (return).', 'woocommerce'));
+                do_action('pawapay_payment_success', $order_id, $order);
             }
             wp_safe_redirect($order->get_checkout_order_received_url());
             exit;
@@ -315,6 +322,7 @@ function pawapay_handle_return(WP_REST_Request $request)
         default:
             $order->update_status('failed', __('Paiement échoué ou annulé via PawaPay (return).', 'woocommerce'));
             wp_safe_redirect(add_query_arg('pawapay_error', '1', wc_get_checkout_url()));
+            do_action('pawapay_payment_failed', $order_id, $order);
             exit;
     }
 
