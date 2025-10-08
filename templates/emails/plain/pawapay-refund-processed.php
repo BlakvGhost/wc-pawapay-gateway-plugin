@@ -27,7 +27,7 @@ if (!empty($order->get_customer_note())) {
     echo esc_html__('Raison du remboursement :', 'wc-pawapay') . ' ' . esc_html($order->get_customer_note()) . "\n\n";
 }
 
-echo esc_html__('Le remboursement sera crédité sur votre compte sous peu dans les jours ouvrables.', 'wc-pawapay') . "\n\n";
+echo esc_html__('Le remboursement sera crédité sur votre compte sous peu.', 'wc-pawapay') . "\n\n";
 
 echo "----------------------------------------\n\n";
 

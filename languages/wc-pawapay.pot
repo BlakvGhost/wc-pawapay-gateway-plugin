@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv3 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce PawaPay Gateway 1.2.0\n"
+"Project-Id-Version: WooCommerce PawaPay Gateway 1.3.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wc-pawapay-gateway\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-10-05T00:05:18+00:00\n"
+"POT-Creation-Date: 2025-10-08T12:47:25+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: wc-pawapay\n"
@@ -168,6 +168,7 @@ msgid "Raison"
 msgstr ""
 
 #: includes/admin/class-pawapay-admin-menu.php:311
+#: includes/emails/class-wc-email-pawapay-refund-processed-admin.php:61
 msgid "Non spécifié"
 msgstr ""
 
@@ -227,13 +228,13 @@ msgid "Vous serez redirigé vers une page sécurisée pour finaliser votre paiem
 msgstr ""
 
 #: includes/class-wc-gateway-pawapay-blocks.php:67
-#: includes/class-wc-gateway-pawapay.php:210
+#: includes/class-wc-gateway-pawapay.php:209
 msgid "Sélectionnez un pays"
 msgstr ""
 
 #: includes/class-wc-gateway-pawapay-blocks.php:68
-#: includes/class-wc-gateway-pawapay.php:179
-#: includes/class-wc-gateway-pawapay.php:219
+#: includes/class-wc-gateway-pawapay.php:178
+#: includes/class-wc-gateway-pawapay.php:218
 msgid "Sélectionnez une devise"
 msgstr ""
 
@@ -271,13 +272,13 @@ msgid "Payer avec PawaPay"
 msgstr ""
 
 #: includes/class-wc-gateway-pawapay-blocks.php:76
-#: includes/class-wc-gateway-pawapay.php:208
+#: includes/class-wc-gateway-pawapay.php:207
 #: assets/js/blocks-integration.js:194
 msgid "Pays"
 msgstr ""
 
 #: includes/class-wc-gateway-pawapay-blocks.php:77
-#: includes/class-wc-gateway-pawapay.php:217
+#: includes/class-wc-gateway-pawapay.php:216
 #: assets/js/blocks-integration.js:226
 msgid "Devise"
 msgstr ""
@@ -302,7 +303,17 @@ msgstr ""
 msgid "PawaPay ne permet que les remboursements intégraux."
 msgstr ""
 
+#: includes/class-wc-gateway-pawapay.php:21
+msgid "Acceptez les paiements Mobile Money via la passerelle sécurisée PawaPay. Compatible multi-pays et multi-opérateurs."
+msgstr ""
+
 #: includes/class-wc-gateway-pawapay.php:73
+#: includes/emails/class-wc-email-pawapay-payment-failed-admin.php:106
+#: includes/emails/class-wc-email-pawapay-payment-failed.php:70
+#: includes/emails/class-wc-email-pawapay-payment-success-admin.php:102
+#: includes/emails/class-wc-email-pawapay-payment-success.php:103
+#: includes/emails/class-wc-email-pawapay-refund-processed-admin.php:112
+#: includes/emails/class-wc-email-pawapay-refund-processed.php:71
 msgid "Activer/Désactiver"
 msgstr ""
 
@@ -362,97 +373,490 @@ msgstr ""
 msgid "Entrez votre clé API ExchangeRate. Laissez vide pour utiliser la version gratuite (non garantie en production)."
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:192
+#: includes/class-wc-gateway-pawapay.php:191
 msgid "Erreur: Impossible de charger les pays supportés."
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:223
+#: includes/class-wc-gateway-pawapay.php:222
 msgid "Le montant total de votre commande de "
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:225
+#: includes/class-wc-gateway-pawapay.php:224
 msgid " sera converti et payé en "
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:266
+#: includes/class-wc-gateway-pawapay.php:265
 msgid "Veuillez sélectionner un pays et une devise."
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:274
-#: includes/class-wc-gateway-pawapay.php:461
+#: includes/class-wc-gateway-pawapay.php:273
+#: includes/class-wc-gateway-pawapay.php:460
 msgid "Erreur de conversion de devise."
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:286
+#: includes/class-wc-gateway-pawapay.php:285
 #, php-format
 msgid "Paiement pour %s"
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:289
+#: includes/class-wc-gateway-pawapay.php:288
 #, php-format
 msgid "Paiement pour %s et %d autres articles"
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:327
+#: includes/class-wc-gateway-pawapay.php:326
 msgid "Erreur de communication avec PawaPay: "
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:336
+#: includes/class-wc-gateway-pawapay.php:335
 msgid "Le paiement a été rejeté par PawaPay."
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:338
+#: includes/class-wc-gateway-pawapay.php:337
 msgid "Raison:"
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:345
+#: includes/class-wc-gateway-pawapay.php:344
 msgid "En attente de paiement sur la page PawaPay."
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:367
+#: includes/class-wc-gateway-pawapay.php:366
 msgid "Order not found."
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:375
+#: includes/class-wc-gateway-pawapay.php:374
 msgid "No transaction ID or metadata found for this order."
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:406
+#: includes/class-wc-gateway-pawapay.php:405
 msgid "Refund failed via PawaPay API."
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:420
-#: wc-pawapay-gateway.php:221
+#: includes/class-wc-gateway-pawapay.php:419
+#: wc-pawapay-gateway.php:226
 msgid "Failed to verify refund status via PawaPay API."
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:426
-#: wc-pawapay-gateway.php:227
-msgid "Refund not completed yet via PawaPay API."
-msgstr ""
-
-#: includes/class-wc-gateway-pawapay.php:429
+#: includes/class-wc-gateway-pawapay.php:428
 #, php-format
 msgid "Refund of %s processed via PawaPay. Reason: %s"
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:434
+#: includes/class-wc-gateway-pawapay.php:433
 msgid "Refund failed."
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:467
+#: includes/class-wc-gateway-pawapay.php:466
 msgid "Devise cible non disponible."
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:482
-#: includes/class-wc-gateway-pawapay.php:504
+#: includes/class-wc-gateway-pawapay.php:481
+#: includes/class-wc-gateway-pawapay.php:503
 msgid "Nonce de sécurité invalide."
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:509
+#: includes/class-wc-gateway-pawapay.php:508
 msgid "Paramètres manquants."
 msgstr ""
 
-#: includes/class-wc-gateway-pawapay.php:535
+#: includes/class-wc-gateway-pawapay.php:534
 msgid "Erreur lors de la conversion."
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-payment-failed-admin.php:13
+msgid "PawaPay - Paiement échoué (Admin)"
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-payment-failed-admin.php:14
+msgid "Email envoyé à l'administrateur lorsqu'un paiement PawaPay échoue."
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-payment-failed-admin.php:35
+msgid "[PawaPay] Paiement échoué - Commande #{order_number}"
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-payment-failed-admin.php:40
+msgid "Paiement PawaPay échoué"
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-payment-failed-admin.php:56
+msgid "Raison non spécifiée"
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-payment-failed-admin.php:108
+#: includes/emails/class-wc-email-pawapay-payment-failed.php:72
+#: includes/emails/class-wc-email-pawapay-payment-success-admin.php:104
+#: includes/emails/class-wc-email-pawapay-payment-success.php:105
+#: includes/emails/class-wc-email-pawapay-refund-processed-admin.php:114
+#: includes/emails/class-wc-email-pawapay-refund-processed.php:73
+msgid "Activer cet email"
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-payment-failed-admin.php:112
+#: includes/emails/class-wc-email-pawapay-payment-success-admin.php:108
+#: includes/emails/class-wc-email-pawapay-refund-processed-admin.php:118
+msgid "Destinataire"
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-payment-failed-admin.php:114
+#: includes/emails/class-wc-email-pawapay-payment-success-admin.php:110
+#: includes/emails/class-wc-email-pawapay-refund-processed-admin.php:120
+msgid "Adresses email des destinataires, séparées par des virgules. Par défaut: "
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-payment-failed-admin.php:120
+#: includes/emails/class-wc-email-pawapay-payment-failed.php:76
+#: includes/emails/class-wc-email-pawapay-payment-success-admin.php:116
+#: includes/emails/class-wc-email-pawapay-payment-success.php:109
+#: includes/emails/class-wc-email-pawapay-refund-processed-admin.php:126
+#: includes/emails/class-wc-email-pawapay-refund-processed.php:77
+msgid "Sujet"
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-payment-failed-admin.php:123
+msgid "Sujet de l'email. Les placeholders disponibles: {site_title}, {order_date}, {order_number}, {order_total}, {failure_reason}"
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-payment-failed-admin.php:128
+#: includes/emails/class-wc-email-pawapay-payment-failed.php:84
+#: includes/emails/class-wc-email-pawapay-payment-success-admin.php:124
+#: includes/emails/class-wc-email-pawapay-payment-success.php:117
+#: includes/emails/class-wc-email-pawapay-refund-processed-admin.php:134
+#: includes/emails/class-wc-email-pawapay-refund-processed.php:85
+msgid "En-tête"
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-payment-failed-admin.php:131
+msgid "En-tête principal de l'email. Les placeholders disponibles: {site_title}, {order_date}, {order_number}, {order_total}, {failure_reason}"
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-payment-failed-admin.php:136
+#: includes/emails/class-wc-email-pawapay-payment-failed.php:92
+#: includes/emails/class-wc-email-pawapay-payment-success-admin.php:132
+#: includes/emails/class-wc-email-pawapay-payment-success.php:125
+#: includes/emails/class-wc-email-pawapay-refund-processed-admin.php:142
+#: includes/emails/class-wc-email-pawapay-refund-processed.php:93
+msgid "Type d'email"
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-payment-failed-admin.php:138
+#: includes/emails/class-wc-email-pawapay-payment-failed.php:94
+#: includes/emails/class-wc-email-pawapay-payment-success-admin.php:134
+#: includes/emails/class-wc-email-pawapay-payment-success.php:127
+#: includes/emails/class-wc-email-pawapay-refund-processed-admin.php:144
+#: includes/emails/class-wc-email-pawapay-refund-processed.php:95
+msgid "Choisir le format de l'email à envoyer."
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-payment-failed-admin.php:142
+#: includes/emails/class-wc-email-pawapay-payment-failed.php:98
+#: includes/emails/class-wc-email-pawapay-payment-success-admin.php:138
+#: includes/emails/class-wc-email-pawapay-payment-success.php:131
+#: includes/emails/class-wc-email-pawapay-refund-processed-admin.php:148
+#: includes/emails/class-wc-email-pawapay-refund-processed.php:99
+msgid "HTML"
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-payment-failed-admin.php:143
+#: includes/emails/class-wc-email-pawapay-payment-failed.php:99
+#: includes/emails/class-wc-email-pawapay-payment-success-admin.php:139
+#: includes/emails/class-wc-email-pawapay-payment-success.php:132
+#: includes/emails/class-wc-email-pawapay-refund-processed-admin.php:149
+#: includes/emails/class-wc-email-pawapay-refund-processed.php:100
+msgid "Plain text"
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-payment-failed.php:13
+msgid "PawaPay - Paiement échoué"
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-payment-failed.php:14
+msgid "Email envoyé lorsqu'un paiement PawaPay échoue."
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-payment-failed.php:33
+msgid "Échec du paiement pour la commande #{order_number}"
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-payment-failed.php:38
+msgid "Paiement échoué"
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-payment-failed.php:79
+#: includes/emails/class-wc-email-pawapay-payment-success.php:112
+msgid "Sujet de l'email. Les placeholders disponibles: {site_title}, {order_date}, {order_number}"
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-payment-failed.php:87
+#: includes/emails/class-wc-email-pawapay-payment-success.php:120
+msgid "En-tête principal de l'email. Les placeholders disponibles: {site_title}, {order_date}, {order_number}"
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-payment-success-admin.php:13
+msgid "PawaPay - Paiement réussi (Admin)"
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-payment-success-admin.php:14
+msgid "Email envoyé à l'administrateur lorsqu'un paiement PawaPay est réussi."
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-payment-success-admin.php:34
+msgid "[PawaPay] Paiement réussi - Commande #{order_number}"
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-payment-success-admin.php:39
+msgid "Nouveau paiement PawaPay réussi"
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-payment-success-admin.php:119
+msgid "Sujet de l'email. Les placeholders disponibles: {site_title}, {order_date}, {order_number}, {order_total}"
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-payment-success-admin.php:127
+msgid "En-tête principal de l'email. Les placeholders disponibles: {site_title}, {order_date}, {order_number}, {order_total}"
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-payment-success.php:13
+msgid "PawaPay - Paiement réussi"
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-payment-success.php:14
+msgid "Email envoyé lorsqu'un paiement PawaPay est réussi."
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-payment-success.php:34
+msgid "Paiement réussi pour la commande #{order_number}"
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-payment-success.php:39
+msgid "Paiement confirmé"
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-refund-processed-admin.php:13
+msgid "PawaPay - Remboursement effectué (Admin)"
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-refund-processed-admin.php:14
+msgid "Email envoyé à l'administrateur lorsqu'un remboursement PawaPay est traité."
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-refund-processed-admin.php:35
+msgid "[PawaPay] Remboursement effectué - Commande #{order_number}"
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-refund-processed-admin.php:40
+msgid "Remboursement PawaPay effectué"
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-refund-processed-admin.php:129
+msgid "Sujet de l'email. Les placeholders disponibles: {site_title}, {order_date}, {order_number}, {refund_amount}, {refund_reason}"
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-refund-processed-admin.php:137
+msgid "En-tête principal de l'email. Les placeholders disponibles: {site_title}, {order_date}, {order_number}, {refund_amount}, {refund_reason}"
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-refund-processed.php:13
+msgid "PawaPay - Remboursement effectué"
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-refund-processed.php:14
+msgid "Email envoyé lorsqu'un remboursement PawaPay est traité."
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-refund-processed.php:33
+msgid "Remboursement pour la commande #{order_number}"
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-refund-processed.php:38
+msgid "Remboursement effectué"
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-refund-processed.php:80
+msgid "Sujet de l'email. Les placeholders disponibles: {site_title}, {order_date}, {order_number}, {refund_amount}"
+msgstr ""
+
+#: includes/emails/class-wc-email-pawapay-refund-processed.php:88
+msgid "En-tête principal de l'email. Les placeholders disponibles: {site_title}, {order_date}, {order_number}, {refund_amount}"
+msgstr ""
+
+#: templates/emails/admin/pawapay-payment-failed.php:17
+#: templates/emails/plain/admin/pawapay-payment-failed.php:18
+msgid "Un paiement PawaPay a échoué."
+msgstr ""
+
+#: templates/emails/admin/pawapay-payment-failed.php:19
+#: templates/emails/admin/pawapay-payment-success.php:19
+msgid "Détails de la commande"
+msgstr ""
+
+#: templates/emails/admin/pawapay-payment-failed.php:22
+#: templates/emails/admin/pawapay-payment-success.php:22
+#: templates/emails/admin/pawapay-refund-processed.php:28
+#: templates/emails/plain/admin/pawapay-payment-failed.php:22
+#: templates/emails/plain/admin/pawapay-payment-success.php:22
+#: templates/emails/plain/admin/pawapay-refund-processed.php:28
+msgid "Numéro de commande :"
+msgstr ""
+
+#: templates/emails/admin/pawapay-payment-failed.php:23
+#: templates/emails/admin/pawapay-payment-success.php:23
+#: templates/emails/plain/admin/pawapay-payment-failed.php:23
+#: templates/emails/plain/admin/pawapay-payment-success.php:23
+msgid "Date :"
+msgstr ""
+
+#: templates/emails/admin/pawapay-payment-failed.php:24
+#: templates/emails/admin/pawapay-payment-success.php:24
+#: templates/emails/plain/admin/pawapay-payment-failed.php:24
+#: templates/emails/plain/admin/pawapay-payment-success.php:24
+msgid "Montant :"
+msgstr ""
+
+#: templates/emails/admin/pawapay-payment-failed.php:25
+#: templates/emails/admin/pawapay-payment-success.php:25
+#: templates/emails/admin/pawapay-refund-processed.php:32
+#: templates/emails/plain/admin/pawapay-payment-failed.php:25
+#: templates/emails/plain/admin/pawapay-payment-success.php:25
+#: templates/emails/plain/admin/pawapay-refund-processed.php:32
+msgid "Client :"
+msgstr ""
+
+#: templates/emails/admin/pawapay-payment-failed.php:26
+#: templates/emails/plain/admin/pawapay-payment-failed.php:26
+msgid "Raison de l'échec :"
+msgstr ""
+
+#: templates/emails/admin/pawapay-payment-failed.php:31
+#: templates/emails/admin/pawapay-payment-success.php:32
+#: templates/emails/admin/pawapay-refund-processed.php:37
+msgid "Voir la commande dans l'admin"
+msgstr ""
+
+#: templates/emails/admin/pawapay-payment-failed.php:36
+#: templates/emails/plain/admin/pawapay-payment-failed.php:31
+msgid "Action recommandée : Contacter le client pour l'aider à finaliser sa commande."
+msgstr ""
+
+#: templates/emails/admin/pawapay-payment-success.php:17
+#: templates/emails/plain/admin/pawapay-payment-success.php:18
+msgid "Un nouveau paiement PawaPay a été confirmé avec succès."
+msgstr ""
+
+#: templates/emails/admin/pawapay-payment-success.php:26
+#: templates/emails/plain/admin/pawapay-payment-success.php:26
+msgid "Email :"
+msgstr ""
+
+#: templates/emails/admin/pawapay-payment-success.php:27
+#: templates/emails/plain/admin/pawapay-payment-success.php:27
+msgid "Téléphone :"
+msgstr ""
+
+#: templates/emails/admin/pawapay-refund-processed.php:23
+#: templates/emails/plain/admin/pawapay-refund-processed.php:24
+msgid "Un remboursement PawaPay a été effectué avec succès."
+msgstr ""
+
+#: templates/emails/admin/pawapay-refund-processed.php:25
+msgid "Détails du remboursement"
+msgstr ""
+
+#: templates/emails/admin/pawapay-refund-processed.php:29
+#: templates/emails/plain/admin/pawapay-refund-processed.php:29
+msgid "Date de la commande :"
+msgstr ""
+
+#: templates/emails/admin/pawapay-refund-processed.php:30
+#: templates/emails/plain/admin/pawapay-refund-processed.php:30
+msgid "Montant remboursé :"
+msgstr ""
+
+#: templates/emails/admin/pawapay-refund-processed.php:31
+#: templates/emails/plain/admin/pawapay-refund-processed.php:31
+msgid "Raison :"
+msgstr ""
+
+#: templates/emails/pawapay-payment-failed.php:17
+#: templates/emails/pawapay-payment-success.php:17
+#: templates/emails/pawapay-refund-processed.php:17
+#: templates/emails/plain/pawapay-payment-failed.php:18
+#: templates/emails/plain/pawapay-payment-success.php:10
+#: templates/emails/plain/pawapay-refund-processed.php:18
+#, php-format
+msgid "Bonjour %s,"
+msgstr ""
+
+#: templates/emails/pawapay-payment-failed.php:19
+#: templates/emails/plain/pawapay-payment-failed.php:20
+#, php-format
+msgid "Votre paiement pour la commande #%s a échoué."
+msgstr ""
+
+#: templates/emails/pawapay-payment-failed.php:21
+#: templates/emails/plain/pawapay-payment-failed.php:22
+msgid "Veuillez réessayer votre paiement ou contacter notre service client si le problème persiste."
+msgstr ""
+
+#: templates/emails/pawapay-payment-failed.php:23
+#: templates/emails/plain/pawapay-payment-failed.php:24
+msgid "Vous pouvez réessayer votre commande ici :"
+msgstr ""
+
+#: templates/emails/pawapay-payment-failed.php:26
+msgid "Réessayer le paiement"
+msgstr ""
+
+#: templates/emails/pawapay-payment-success.php:19
+#: templates/emails/plain/pawapay-payment-success.php:12
+#, php-format
+msgid "Votre paiement pour la commande #%s a été confirmé avec succès."
+msgstr ""
+
+#: templates/emails/pawapay-payment-success.php:21
+msgid "Merci pour votre confiance ! Votre commande est en cours de préparation."
+msgstr ""
+
+#: templates/emails/pawapay-refund-processed.php:21
+#: templates/emails/plain/pawapay-refund-processed.php:21
+#, php-format
+msgid "Un remboursement de %s a été effectué pour votre commande #%s."
+msgstr ""
+
+#: templates/emails/pawapay-refund-processed.php:28
+#: templates/emails/plain/pawapay-refund-processed.php:27
+msgid "Raison du remboursement :"
+msgstr ""
+
+#: templates/emails/pawapay-refund-processed.php:31
+#: templates/emails/plain/pawapay-refund-processed.php:30
+msgid "Le remboursement sera crédité sur votre compte sous peu."
+msgstr ""
+
+#: templates/emails/plain/admin/pawapay-payment-failed.php:20
+#: templates/emails/plain/admin/pawapay-payment-success.php:20
+#: templates/emails/plain/pawapay-refund-processed.php:34
+msgid "DÉTAILS DE LA COMMANDE"
+msgstr ""
+
+#: templates/emails/plain/admin/pawapay-payment-failed.php:28
+#: templates/emails/plain/admin/pawapay-payment-success.php:29
+#: templates/emails/plain/admin/pawapay-refund-processed.php:34
+msgid "Lien vers la commande :"
+msgstr ""
+
+#: templates/emails/plain/admin/pawapay-refund-processed.php:26
+msgid "DÉTAILS DU REMBOURSEMENT"
+msgstr ""
+
+#: templates/emails/plain/pawapay-payment-failed.php:31
+msgid "Note de commande :"
+msgstr ""
+
+#: templates/emails/plain/pawapay-payment-failed.php:32
+msgid "Cette notification a été envoyée à un administrateur."
+msgstr ""
+
+#: wc-pawapay-gateway.php:236
+msgid "Remboursement complété via webhook PawaPay"
 msgstr ""

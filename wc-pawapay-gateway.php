@@ -3,7 +3,7 @@
 Plugin Name: WooCommerce PawaPay Gateway
 Plugin URI: https://github.com/BlakvGhost/wc-pawapay-gateway-plugin#readme
 Description: Accept Mobile Money payments through the PawaPay Payment Page in WooCommerce. Supports multi-country and multi-operator payments with automatic currency conversion (XOF/XAF/EUR/USD), full refund management, WooCommerce Block & Classic Checkout compatibility, and an integrated PawaPay Dashboard. Includes optional ExchangeRate API integration and unique webhook identifiers for multi-store setups.
-Version: 1.2.1
+Version: 1.3.0
 Author: Kabirou ALASSANE
 Author URI: https://kabiroualassane.link
 License: GPLv3 or later
@@ -187,6 +187,7 @@ function pawapay_handle_webhook(WP_REST_Request $request)
             do_action('pawapay_payment_failed', $order_id, $order, $reason);
             break;
         case 'CANCELLED':
+            $reason = isset($body['failureReason']) ? sanitize_text_field($body['failureReason']) : 'Inconnue';
             $order->update_status('cancelled', __('Le paiement PawaPay a été annulé.', 'woocommerce'));
             do_action('pawapay_payment_failed', $order_id, $order, $reason);
             break;
@@ -288,7 +289,6 @@ function pawapay_handle_return(WP_REST_Request $request)
         exit;
     }
 
-    // Vérifier l'état auprès de l'API PawaPay
     $gateway = WC()->payment_gateways->payment_gateways()['pawapay'] ?? null;
     if (!$gateway) {
         wc_add_notice(__('Erreur: Gateway PawaPay introuvable.', 'woocommerce'), 'error');
@@ -322,14 +322,12 @@ function pawapay_handle_return(WP_REST_Request $request)
         case 'FAILED':
         case 'CANCELLED':
         default:
-            $reason = isset($body['failureReason']) ? sanitize_text_field($body['failureReason']) : 'Inconnue';
+            $reason = isset($data['failureReason']) ? sanitize_text_field($data['failureReason']) : 'Inconnue';
             $order->update_status('failed', __('Paiement échoué ou annulé via PawaPay (return).', 'woocommerce'));
             wp_safe_redirect(add_query_arg('pawapay_error', '1', wc_get_checkout_url()));
             do_action('pawapay_payment_failed', $order_id, $order, $reason);
             exit;
     }
-
-    exit;
 }
 
 add_action('woocommerce_before_checkout_form', function () {

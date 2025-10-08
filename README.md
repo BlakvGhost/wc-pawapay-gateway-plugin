@@ -22,7 +22,8 @@ It supports multi-country, multi-operator payments, secure transaction validatio
 - Dedicated refund interface in the **PawaPay Dashboard**  
 - Refund history tracking  
 ✅ Supports both **Block Checkout** and **Classic Checkout** interfaces  
-✅ Admin **PawaPay Dashboard** with transaction history and refund management  
+✅ Admin **PawaPay Dashboard** with transaction history and refund management
+✅ Emails sending on success or failed payment/refund to customer as to admin
 
 ---
 

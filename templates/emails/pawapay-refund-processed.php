@@ -28,7 +28,7 @@ do_action('woocommerce_email_header', $email_heading, $email);
     <p><strong><?php esc_html_e('Raison du remboursement :', 'wc-pawapay'); ?></strong> <?php echo esc_html($order->get_customer_note()); ?></p>
 <?php endif; ?>
 
-<p><?php esc_html_e('Le remboursement sera crédité sur votre compte sous 3 à 5 jours ouvrables.', 'wc-pawapay'); ?></p>
+<p><?php esc_html_e('Le remboursement sera crédité sur votre compte sous peu.', 'wc-pawapay'); ?></p>
 
 <?php
 do_action('woocommerce_email_order_details', $order, $sent_to_admin, $plain_text, $email);
