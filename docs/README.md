@@ -23,6 +23,7 @@ It supports multi-country, multi-operator payments, secure transaction validatio
 - Refund history tracking  
 ✅ Supports both **Block Checkout** and **Classic Checkout** interfaces  
 ✅ Admin **PawaPay Dashboard** with transaction history and refund management  
+✅ Email Notifications
 
 ---
 
@@ -120,6 +121,46 @@ In your PawaPay dashboard, configure the following URLs:
 - When configured correctly, WooCommerce will automatically reflect real payment states (**Success**, **Failed**, **Pending**).  
 - Ensure your domain is **HTTPS** and publicly accessible.  
 - Always test in **Sandbox Mode** before going live.  
+
+---
+
+## Email Notifications
+
+The plugin automatically sends email notifications related to payment and refund events — both to the customer and the store admin, provided that email notifications are enabled in WooCommerce → Settings → Emails.
+
+Supported Email Events
+
+- Payment Success
+
+  - Customer receives a confirmation email for successful payment.
+
+  - Admin receives a notification email with full payment details.
+
+- Payment Failed
+
+  - Customer receives an email notifying them that their payment attempt failed.
+
+  - Admin is alerted with the failed transaction details.
+
+- Refund Success
+
+  - Customer receives an email confirming that their payment has been refunded.
+
+  - Admin is notified with refund details and reference ID.
+
+- Refund Failed
+
+  - Admin receives an email when a refund attempt fails (with reason and response message).
+
+### Requirements
+
+WooCommerce email notifications must be enabled (WooCommerce → Settings → Emails)
+
+Ensure that the From email address and email templates are correctly configured
+
+SMTP or transactional email service (like WP Mail SMTP, SendGrid, or Brevo) is recommended for better deliverability
+
+![WooCommerce → Settings → Emails](email-notifications-conf.png)
 
 ---
 
