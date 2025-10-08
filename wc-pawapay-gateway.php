@@ -228,35 +228,11 @@ function pawapay_handle_refund_webhook(WP_REST_Request $request)
     $checkData = json_decode(wp_remote_retrieve_body($checkResponse), true);
 
     if (isset($checkData['data']['status']) && $checkData['data']['status'] === 'COMPLETED') {
-        $order_id = 0;
+        $order_id = $checkData['metadata']['order_id'] ?? 0;
 
-        if (isset($body['metadata']) && is_array($body['metadata'])) {
-            foreach ($body['metadata'] as $meta) {
-                if (isset($meta['order_id'])) {
-                    $order_id = intval($meta['order_id']);
-                    break;
-                }
-            }
-        }
-
-        if (!$order_id) {
-            $orders = wc_get_orders([
-                'limit' => 1,
-                'meta_key' => 'pawapay_last_refund_id',
-                'meta_value' => $refund_id,
-                'return' => 'ids'
-            ]);
-
-            if (!empty($orders)) {
-                $order_id = $orders[0];
-            }
-        }
-
-        if ($order_id) {
-            $order = wc_get_order($order_id);
-            if ($order) {
-                do_action('pawapay_refund_processed', $order_id, $order, $order->get_total(), __('Remboursement complété via webhook PawaPay', 'wc-pawapay'));
-            }
+        $order = wc_get_order($order_id);
+        if ($order) {
+            do_action('pawapay_refund_processed', $order_id, $order, $order->get_total(), __('Remboursement complété via webhook PawaPay', 'wc-pawapay'));
         }
     }
 
