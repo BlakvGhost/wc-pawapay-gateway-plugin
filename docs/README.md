@@ -15,15 +15,15 @@ It supports multi-country, multi-operator payments, secure transaction validatio
 ✅ Mobile operator logos displayed at checkout  
 ✅ Multi-country support (West & Central Africa)  
 ✅ Sandbox and Production modes  
-✅ Secure webhook support for real-time status validation  
-✅ Complete refund system:  
+✅ Secure webhook support for real-time status validation
+✅ Supports both **Block Checkout** and **Classic Checkout** interfaces  
+✅ Admin **PawaPay Dashboard** with transaction history and refund management
+✅ Email Notifications
+✅ Complete refund system:
 
 - Refunds directly from WooCommerce order details  
 - Dedicated refund interface in the **PawaPay Dashboard**  
-- Refund history tracking  
-✅ Supports both **Block Checkout** and **Classic Checkout** interfaces  
-✅ Admin **PawaPay Dashboard** with transaction history and refund management  
-✅ Email Notifications
+- Refund history tracking
 
 ---
 
