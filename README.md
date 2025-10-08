@@ -7,7 +7,7 @@ It supports multi-country, multi-operator payments, secure transaction validatio
 
 ## Features
 
-✅ Full integration with WooCommerce  
+✅ Full integration with **WooCommerce**  
 ✅ Mobile Money payments via the **PawaPay Payment Page**  
 ✅ Automatic currency conversion (any supported currency → XOF / XAF depending on country)  
 ✅ Supports both free and API-key-based exchange rate providers  
@@ -16,7 +16,8 @@ It supports multi-country, multi-operator payments, secure transaction validatio
 ✅ Multi-country support (West & Central Africa)  
 ✅ Sandbox and Production modes  
 ✅ Secure webhook support for real-time status validation
-✅ Supports both **Block Checkout** and **Classic Checkout** interfaces  
+
+✅ Supports both **Block Checkout** and **Classic Checkout** interfaces
 ✅ Admin **PawaPay Dashboard** with transaction history and refund management
 ✅ Email Notifications
 ✅ Complete refund system:
