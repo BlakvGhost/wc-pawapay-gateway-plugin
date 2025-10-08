@@ -14,7 +14,6 @@ class WC_PawaPay_Emails
         add_action('pawapay_payment_failed', array($this, 'trigger_payment_failed'), 10, 3);
         add_action('pawapay_refund_processed', array($this, 'trigger_refund_processed'), 10, 4);
 
-        // S'assurer que les templates sont chargés depuis le bon dossier
         add_filter('woocommerce_locate_template', array($this, 'locate_template'), 10, 3);
     }
 
@@ -77,30 +76,49 @@ class WC_PawaPay_Emails
         }
     }
 
-    public function trigger_refund_processed($order_id, $order, $refund_amount = '', $refund_reason = '')
+    public function trigger_refund_processed($order_id, $order = false, $refund_amount = '', $refund_reason = '')
     {
-        $mailer = WC()->mailer();
-
-        // Email client
-        $customer_email = $mailer->emails['WC_Email_PawaPay_Refund_Processed'];
-        if ($customer_email->is_enabled()) {
-            $customer_email->trigger($order_id, $order, $refund_amount);
+        if (!function_exists('WC') || !is_object(WC()->mailer)) {
+            error_log('PawaPay Emails Error: WooCommerce mailer not available');
+            return;
         }
 
-        // Email admin
-        $admin_email = $mailer->emails['WC_Email_PawaPay_Refund_Processed_Admin'];
-        if ($admin_email->is_enabled()) {
-            $admin_email->trigger($order_id, $order, $refund_amount, $refund_reason);
+        $mailer = WC()->mailer();
+
+        if (isset($mailer->emails['WC_Email_PawaPay_Refund_Processed_Admin'])) {
+            $admin_email = $mailer->emails['WC_Email_PawaPay_Refund_Processed_Admin'];
+            if ($admin_email->is_enabled()) {
+                if (!$order && $order_id) {
+                    $order = wc_get_order($order_id);
+                }
+
+                if (is_a($order, 'WC_Order')) {
+                    $admin_email->trigger($order_id, $order, $refund_amount, $refund_reason);
+                } else {
+                    error_log('PawaPay Refund Email Error: Invalid order for ID: ' . $order_id);
+                }
+            }
+        }
+
+        if (isset($mailer->emails['WC_Email_PawaPay_Refund_Processed'])) {
+            $customer_email = $mailer->emails['WC_Email_PawaPay_Refund_Processed'];
+            if ($customer_email->is_enabled()) {
+                if (!$order && $order_id) {
+                    $order = wc_get_order($order_id);
+                }
+
+                if (is_a($order, 'WC_Order')) {
+                    $customer_email->trigger($order_id, $order, $refund_amount);
+                }
+            }
         }
     }
 
     public function locate_template($template, $template_name, $template_path)
     {
-        // Vérifier si c'est un template PawaPay
         if (strpos($template_name, 'pawapay-') === 0) {
             $plugin_template_path = WC_PAWAPAY_PLUGIN_DIR . 'templates/' . $template_name;
 
-            // Vérifier si le template existe dans le plugin
             if (file_exists($plugin_template_path)) {
                 return $plugin_template_path;
             }

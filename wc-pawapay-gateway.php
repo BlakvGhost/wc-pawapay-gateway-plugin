@@ -204,7 +204,7 @@ function pawapay_handle_refund_webhook(WP_REST_Request $request)
         return new WP_Error('missing_data', 'Données de webhook invalides', ['status' => 400]);
     }
 
-    $order_id = $body['refundId'] ?? 0;
+    $refund_id = $body['refundId'] ?? 0;
 
     $gateways = WC()->payment_gateways->payment_gateways();
     $gateway = $gateways['pawapay'] ?? null;
@@ -214,7 +214,7 @@ function pawapay_handle_refund_webhook(WP_REST_Request $request)
     }
 
     $client = $gateway->client;
-    $url    = $client->get_base_url() . '/refunds/' . $order_id;
+    $url    = $client->get_base_url() . '/refunds/' . $refund_id;
 
     $checkResponse = wp_remote_get($url, [
         'headers' => $client->get_headers(),
@@ -222,18 +222,43 @@ function pawapay_handle_refund_webhook(WP_REST_Request $request)
     ]);
 
     if (is_wp_error($checkResponse) || wp_remote_retrieve_response_code($checkResponse) !== 200) {
-        do_action('pawapay_refund_processed', $order_id, $order, $amount, $reason);
         return new WP_Error('refund_check_failed', __('Failed to verify refund status via PawaPay API.', 'wc-pawapay'));
     }
 
     $checkData = json_decode(wp_remote_retrieve_body($checkResponse), true);
 
-    if (isset($checkData['data']['status']) && $checkData['data']['status'] !== 'COMPLETED') {
-        do_action('pawapay_refund_processed', $order_id, $order, $amount, $reason);
-        return new WP_Error('refund_not_completed', __('Refund not completed yet via PawaPay API.', 'wc-pawapay'));
-    }
+    if (isset($checkData['data']['status']) && $checkData['data']['status'] === 'COMPLETED') {
+        $order_id = 0;
 
-    do_action('pawapay_refund_processed', $order_id, $order, $amount);
+        if (isset($body['metadata']) && is_array($body['metadata'])) {
+            foreach ($body['metadata'] as $meta) {
+                if (isset($meta['order_id'])) {
+                    $order_id = intval($meta['order_id']);
+                    break;
+                }
+            }
+        }
+
+        if (!$order_id) {
+            $orders = wc_get_orders([
+                'limit' => 1,
+                'meta_key' => 'pawapay_last_refund_id',
+                'meta_value' => $refund_id,
+                'return' => 'ids'
+            ]);
+
+            if (!empty($orders)) {
+                $order_id = $orders[0];
+            }
+        }
+
+        if ($order_id) {
+            $order = wc_get_order($order_id);
+            if ($order) {
+                do_action('pawapay_refund_processed', $order_id, $order, $order->get_total(), __('Remboursement complété via webhook PawaPay', 'wc-pawapay'));
+            }
+        }
+    }
 
     return new WP_REST_Response(['status' => 'success'], 200);
 }

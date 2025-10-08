@@ -48,13 +48,17 @@ class WC_Email_PawaPay_Refund_Processed_Admin extends WC_Email
             $order = wc_get_order($order_id);
         }
 
-        if (is_a($order, 'WC_Order')) {
-            $this->object = $order;
-            $this->placeholders['{order_date}'] = wc_format_datetime($this->object->get_date_created());
-            $this->placeholders['{order_number}'] = $this->object->get_order_number();
-            $this->placeholders['{refund_amount}'] = $refund_amount ? wc_price($refund_amount) : wc_price($order->get_total());
-            $this->placeholders['{refund_reason}'] = $refund_reason ?: __('Non spécifié', 'wc-pawapay');
+        if (!is_a($order, 'WC_Order')) {
+            error_log('PawaPay Refund Email Error: Order not found for ID: ' . $order_id);
+            $this->restore_locale();
+            return;
         }
+
+        $this->object = $order;
+        $this->placeholders['{order_date}'] = wc_format_datetime($this->object->get_date_created());
+        $this->placeholders['{order_number}'] = $this->object->get_order_number();
+        $this->placeholders['{refund_amount}'] = $refund_amount ? wc_price($refund_amount) : wc_price($order->get_total());
+        $this->placeholders['{refund_reason}'] = $refund_reason ?: __('Non spécifié', 'wc-pawapay');
 
         if ($this->is_enabled() && $this->get_recipient()) {
             $this->send($this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments());

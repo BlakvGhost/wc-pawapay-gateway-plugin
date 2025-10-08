@@ -11,6 +11,12 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// Vérifier que l'ordre existe avant d'afficher le contenu
+if (!isset($order) || !is_a($order, 'WC_Order')) {
+    error_log('PawaPay Refund Email Template Error: Order object is missing or invalid');
+    return;
+}
+
 do_action('woocommerce_email_header', $email_heading, $email);
 ?>
 

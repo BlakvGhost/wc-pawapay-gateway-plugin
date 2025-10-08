@@ -11,6 +11,12 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// Vérifier que l'ordre existe
+if (!isset($order) || !is_a($order, 'WC_Order')) {
+    error_log('PawaPay Refund Email Template Error: Order object is missing or invalid');
+    return;
+}
+
 echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n";
 echo esc_html(wp_strip_all_tags($email_heading));
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
