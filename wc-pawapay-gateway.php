@@ -166,7 +166,7 @@ function pawapay_handle_webhook(WP_REST_Request $request)
         return new WP_Error('order_not_found', 'Commande non trouvée', ['status' => 404]);
     }
 
-    if ($order->is_paid() || in_array($order->get_status(), ['processing', 'completed', 'failed'])) {
+    if ($order->is_paid() || in_array($order->get_status(), ['processing', 'completed'])) {
         return new WP_REST_Response(['status' => 'success', 'message' => 'Commande déjà traitée'], 200);
     }
 
